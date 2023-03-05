@@ -12,7 +12,7 @@ int main()
     unsigned char* buffer;
     long filelen;
 
-    fileptr = fopen("listing38", "rb");  // Open the file in binary mode
+    fileptr = fopen("listing39", "rb");  // Open the file in binary mode
     fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
     filelen = ftell(fileptr);             // Get the current byte offset in the file
     rewind(fileptr);                      // Jump back to the beginning of the file
