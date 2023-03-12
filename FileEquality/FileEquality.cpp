@@ -12,7 +12,7 @@ int main()
     unsigned char* buffer;
     long filelen;
 
-    fileptr = fopen("listing39", "rb");  // Open the file in binary mode
+    fileptr = fopen("listing41", "rb");  // Open the file in binary mode
     fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
     filelen = ftell(fileptr);             // Get the current byte offset in the file
     rewind(fileptr);                      // Jump back to the beginning of the file
@@ -37,17 +37,18 @@ int main()
 
     bool error = false;
     if (filelen != filelen2) {
-        cout << "file lengths were different";
+        cout << "file lengths were different" << filelen << " vs " << filelen2 << std::endl;
         error = true;
     }
-    else {
+    //else {
         for (int i = 0; i < filelen; ++i) {
             if (buffer[i] != buffer2[i]) {
-                cout << "files different at byte " << i << ": " << bitset<8>(buffer[i]).to_string() << " <> " << bitset<8>(buffer2[i]).to_string();
+                cout << "files different at byte " << i << ": " << bitset<8>(buffer[i]).to_string() << " <> " << bitset<8>(buffer2[i]).to_string() << std::endl;
                 error = true;
+                break;
             }
         }
-    }
+    //}
     if (!error) {
         cout << "files are equal";
     }
