@@ -18,12 +18,12 @@ int main(int argc, char *argv[]) {
     ofstream outfile;
     auto outFileName = std::string(fileName) + "_print.asm";
     outfile.open(outFileName.c_str());
-    Printer printer(cout);
+    //Printer printer(cout);
     Simulator simulator(instructions);
     auto maxIndex = instructions[instructions.size() - 1].address;
     while(simulator.instructionPointer <= maxIndex) {
         auto i = simulator.Execute();
-        printer.print(instructions[i]);
+        //printer.print(instructions[i]);
         cout << std::endl;
     }
     simulator.PrintRegisters();

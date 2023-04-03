@@ -42,6 +42,8 @@ int Simulator::Execute()
 		break;
 	case moveOp:
 		ExecuteMove(instruction);
+	case jnzOp:
+		ExecuteJnz(instruction);
 	default:
 		break;
 	}
@@ -63,7 +65,6 @@ int Simulator::Execute()
 		cout << "changed instruction pointer " << beforeIp << " to " << instructionPointer << std::endl;
 	}
 
-	int jumpOffset = 0;
 	return instructionIndex;
 }
 
@@ -131,6 +132,13 @@ void Simulator::ExecuteImmediateFromReg(const Instruction& instruction)
 		SetFlags(temp);
 		break;
 	}
+	}
+}
+
+void Simulator::ExecuteJnz(const Instruction& instruction)
+{
+	if (!zeroFlag) {
+		instructionPointer += instruction.jumpOffset;
 	}
 }
 

@@ -25,6 +25,7 @@ private:
 	void ExecuteMove(const Instruction &instruction);
 	void ExecuteAddSubComp(const Instruction& instruction);
 	void ExecuteImmediateFromReg(const Instruction& instruction);
+	void ExecuteJnz(const Instruction &instruction);
 	void SetFlags(unsigned short result);
 	const vector<Instruction> instructions;
 	unordered_map<int, int> instructionIdByAddress;
