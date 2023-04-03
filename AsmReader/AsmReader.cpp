@@ -79,6 +79,10 @@ std::vector<Instruction> AsmReader::read(string filename)
     long filelen;
 
     fileptr = fopen(filename.c_str(), "rb");  // Open the file in binary mode
+    if (!fileptr) {
+        std::cerr << "could not open file at " << filename;
+        exit(-1);
+    }
     fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
     filelen = ftell(fileptr);             // Get the current byte offset in the file
     rewind(fileptr);                      // Jump back to the beginning of the file

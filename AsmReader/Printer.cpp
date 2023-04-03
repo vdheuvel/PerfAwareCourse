@@ -6,7 +6,7 @@
 using std::cout;
 using std::bitset;
 
-Printer::Printer(ofstream& outfile) : outfile(outfile)
+Printer::Printer(ostream& outfile) : outfile(outfile)
 {
     outfile << "bits 16" << std::endl;
 }

@@ -4,11 +4,11 @@
 #include "Instruction.h"
 
 using std::string;
-using std::ofstream;
+using std::ostream;
 
 class Printer {
 public:
-	Printer(ofstream& outfile);
+	Printer(ostream& outfile);
 	void print(const Instruction &instruction);
 private:
 	string getOpString(unsigned char opcode, unsigned char opMid);
@@ -18,5 +18,5 @@ private:
 	void writeImmediateFromRegInstruction(const Instruction &instruction);
 	void writeImmediateToRegInstruction(const Instruction &instruction);
 	void writeJumpInstruction(int offset);
-	ofstream &outfile;
+	ostream &outfile;
 };

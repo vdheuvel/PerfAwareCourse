@@ -18,10 +18,11 @@ int main(int argc, char *argv[]) {
     ofstream outfile;
     auto outFileName = std::string(fileName) + "_print.asm";
     outfile.open(outFileName.c_str());
-    Printer printer(outfile);
+    Printer printer(cout);
     Simulator simulator;
     for (const auto& i : instructions) {
-        //printer.print(i);
+        printer.print(i);
+        cout << std::endl;
         simulator.Execute(i);
     }
     simulator.PrintRegisters();
