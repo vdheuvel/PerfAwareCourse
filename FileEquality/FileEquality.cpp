@@ -3,16 +3,23 @@
 #include <iostream>
 #include <bitset>
 using std::cout;
+using std::cerr;
 using std::string;
 using std::bitset;
 
-int main()
+int main(int argc, char *argv[])
 {
     FILE* fileptr;
     unsigned char* buffer;
     long filelen;
-
-    fileptr = fopen("listing41", "rb");  // Open the file in binary mode
+    auto leftFileName = argv[1];
+    auto rightFileName = argv[2];
+    
+    fileptr = fopen(leftFileName, "rb");  // Open the file in binary mode
+    if (!fileptr) {
+        cerr << "file not found " << leftFileName;
+        exit(-1);
+    }
     fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
     filelen = ftell(fileptr);             // Get the current byte offset in the file
     rewind(fileptr);                      // Jump back to the beginning of the file
@@ -26,7 +33,12 @@ int main()
     unsigned char* buffer2;
     long filelen2;
 
-    fileptr2 = fopen("out", "rb");  // Open the file in binary mode
+    fileptr2 = fopen(rightFileName, "rb");  // Open the file in binary mode
+    if (!fileptr2) {
+        cerr << "file not found " << rightFileName;
+        exit(-1);
+    }
+
     fseek(fileptr2, 0, SEEK_END);          // Jump to the end of the file
     filelen2 = ftell(fileptr2);             // Get the current byte offset in the file
     rewind(fileptr2);                      // Jump back to the beginning of the file
