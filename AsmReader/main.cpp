@@ -4,6 +4,7 @@
 #include"AsmReader.h"
 #include"Printer.h"
 #include "Constants.h"
+#include "Simulator.h"
 using std::cout;
 using std::string;
 using std::ofstream;
@@ -18,8 +19,11 @@ int main(int argc, char *argv[]) {
     auto outFileName = std::string(fileName) + "_print.asm";
     outfile.open(outFileName.c_str());
     Printer printer(outfile);
+    Simulator simulator;
     for (const auto& i : instructions) {
-        printer.print(i);
+        //printer.print(i);
+        simulator.Execute(i);
     }
+    simulator.PrintRegisters();
     outfile.close();
 }

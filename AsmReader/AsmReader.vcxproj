@@ -130,12 +130,14 @@
     <ClCompile Include="AsmReader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Printer.cpp" />
+    <ClCompile Include="Simulator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AsmReader.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Instruction.h" />
     <ClInclude Include="Printer.h" />
+    <ClInclude Include="Simulator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

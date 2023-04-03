@@ -1,4 +1,6 @@
 #pragma once
+using std::string;
+
 const int moveOp = 0b100010; // op6
 const int immediateToRegOp = 0b1011; // op4
 const int addOp = 0;
