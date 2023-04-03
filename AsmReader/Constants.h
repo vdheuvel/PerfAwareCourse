@@ -29,24 +29,24 @@ const int loopnzOp = 0b11100000; // op8
 const int jcxzOp = 0b11100011; // op8
 
 const string w0mod11Registers[8] = {
-    "AL",
-    "CL",
-    "DL",
-    "BL",
-    "AH",
-    "CH",
-    "DH",
-    "BH"
+    "al",
+    "cl",
+    "dl",
+    "bl",
+    "ah",
+    "ch",
+    "dh",
+    "bh"
 };
 const string w1mod11Registers[8] = {
-    "AX",
-    "CX",
-    "DX",
-    "BX",
-    "SP",
-    "BP",
-    "SI",
-    "DI"
+    "ax",
+    "cx",
+    "dx",
+    "bx",
+    "sp",
+    "bp",
+    "si",
+    "di"
 };
 const string addressCalc[8] = {
     "BX + SI",

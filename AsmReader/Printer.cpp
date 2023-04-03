@@ -124,11 +124,12 @@ void Printer::writeImmediateFromRegInstruction(const Instruction& instruction)
 void Printer::writeImmediateToRegInstruction(const Instruction& instruction)
 {
     if (instruction.w) {
-        outfile << w1mod11Registers[instruction.reg] << ", " << (unsigned short)instruction.immediate;
+        outfile << w1mod11Registers[instruction.reg];
     }
     else {
-        outfile << w0mod11Registers[instruction.reg] << ", " << (char)instruction.immediate;
+        outfile << w0mod11Registers[instruction.reg];
     }
+    outfile << ", " << (unsigned short)instruction.immediate;
 }
 
 void Printer::writeJumpInstruction(int offset)
