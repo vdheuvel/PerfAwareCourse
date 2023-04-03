@@ -96,6 +96,7 @@ std::vector<Instruction> AsmReader::read(string filename)
 
     while (i < filelen) {
         Instruction instruction;
+        instruction.address = i;
         instruction.opcode = getOperation(buffer[i]);
         switch (instruction.opcode)
         {
@@ -178,6 +179,7 @@ std::vector<Instruction> AsmReader::read(string filename)
             break;
         }
 
+        instruction.size = i - instruction.address;
         instructions.push_back(instruction);
     }
     return instructions;

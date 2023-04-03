@@ -7,18 +7,27 @@
 using std::cout;
 using std::bitset;
 
-Simulator::Simulator()
+Simulator::Simulator(vector<Instruction> instructions) : instructions(instructions)
 {
 	for (auto &r: registers) {
 		r = 0;
 	}
+	for (int i = 0; i < instructions.size(); ++i) {
+		instructionIdByAddress.insert({ instructions[i].address, i });
+	}
 }
 
-void Simulator::Execute(const Instruction &instruction)
+int Simulator::Execute()
 {
 	auto before = registers;
 	auto beforeZeroFlag = zeroFlag;
 	auto beforeSignFlag = signFlag;
+	auto beforeIp = instructionPointer;
+
+	int instructionIndex = instructionIdByAddress[instructionPointer];
+	const Instruction& instruction = instructions[instructionIndex];
+
+	instructionPointer += instruction.size;
 
 	switch (instruction.opcode)
 	{
@@ -50,6 +59,12 @@ void Simulator::Execute(const Instruction &instruction)
 	if (signFlag != beforeSignFlag) {
 		cout << "changed sign flag from " << beforeSignFlag << " to " << signFlag << std::endl;
 	}
+	if (instructionPointer != beforeIp) {
+		cout << "changed instruction pointer " << beforeIp << " to " << instructionPointer << std::endl;
+	}
+
+	int jumpOffset = 0;
+	return instructionIndex;
 }
 
 void Simulator::ExecuteImmediateToReg(const Instruction &instruction)
