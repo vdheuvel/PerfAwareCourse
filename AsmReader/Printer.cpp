@@ -103,6 +103,9 @@ void Printer::writeImmediateFromRegInstruction(const Instruction& instruction)
             addresscalcstr = w0mod11Registers[instruction.rm];
         }
     }
+    else if (instruction.mod == 0 && instruction.rm == 6) {
+        addresscalcstr = std::to_string(instruction.displacement);
+    }
     else {
         addresscalcstr = addressCalc[instruction.rm];
     }
