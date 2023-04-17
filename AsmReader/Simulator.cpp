@@ -12,6 +12,9 @@ Simulator::Simulator(vector<Instruction> instructions) : instructions(instructio
 	for (auto &r: registers) {
 		r = 0;
 	}
+	for (auto& m : memory) {
+		m = 0;
+	}
 	for (int i = 0; i < instructions.size(); ++i) {
 		instructionIdByAddress.insert({ instructions[i].address, i });
 	}
@@ -37,13 +40,18 @@ int Simulator::Execute()
 	case immediateFromRegOp:
 		ExecuteImmediateFromReg(instruction);
 		break;
+	case immediateToRegMemOp:
+		ExecuteImmediateToRegMem(instruction);
+		break;
 	case addSubCmpOp:
 		ExecuteAddSubComp(instruction);
 		break;
 	case moveOp:
 		ExecuteMove(instruction);
+		break;
 	case jnzOp:
 		ExecuteJnz(instruction);
+		break;
 	default:
 		break;
 	}
@@ -78,14 +86,39 @@ void Simulator::ExecuteImmediateToReg(const Instruction &instruction)
 	}
 }
 
+void Simulator::ExecuteImmediateToRegMem(const Instruction &instruction)
+{
+	if (instruction.w) {
+		if (instruction.mod == 0) {
+			memory[instruction.displacement] = instruction.immediate;
+		}
+		else if(instruction.mod == 1) {
+			memory[getAddressCalc(instruction.rm) + instruction.displacement] = instruction.immediate;
+		}
+	}
+	else {
+		// not implemented
+	}
+}
+
 void Simulator::ExecuteMove(const Instruction& instruction)
 {
 	if (instruction.w) {
-		if (instruction.d) {
-			registers[instruction.reg] = registers[instruction.rm];
+		if (instruction.mod == 3) {
+			if (instruction.d) {
+				registers[instruction.reg] = registers[instruction.rm];
+			}
+			else {
+				registers[instruction.rm] = registers[instruction.reg];
+			}
 		}
-		else {
-			registers[instruction.rm] = registers[instruction.reg];
+		else if(instruction.mod == 0){
+			if (instruction.d) {
+				registers[instruction.reg] = memory[instruction.displacement];
+			}
+			else {
+				registers[instruction.rm] = memory[instruction.displacement];
+			}
 		}
 	}
 	else {
@@ -146,6 +179,28 @@ void Simulator::SetFlags(unsigned short result)
 {
 	zeroFlag = result == 0;
 	signFlag = result & 0b1000000000000000;
+}
+
+int Simulator::getAddressCalc(unsigned short rm)
+{
+	switch (rm) {
+	case 0:
+		return registers[3] + registers[6];
+	case 1:
+		return registers[3] + registers[7];
+	case 2:
+		return registers[5] + registers[6];
+	case 3:
+		return registers[5] + registers[7];
+	case 4:
+		return registers[6];
+	case 5: 
+		return registers[7];
+	case 6:
+		return registers[6];
+	case 7:
+		return registers[3];
+	}
 }
 
 void Simulator::PrintRegisters() const

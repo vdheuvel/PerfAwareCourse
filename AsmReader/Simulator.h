@@ -18,10 +18,13 @@ public:
 	int instructionPointer = 0;
 private:
 	const static int registerCount = 8;
+	const static unsigned int memorySize = 1 << 16;
 	array<unsigned short, registerCount> registers;
+	array<unsigned short, memorySize> memory;
 	bool zeroFlag = false;
 	bool signFlag = false;
 	void ExecuteImmediateToReg(const Instruction &instruction);
+	void ExecuteImmediateToRegMem(const Instruction &instruction);
 	void ExecuteMove(const Instruction &instruction);
 	void ExecuteAddSubComp(const Instruction& instruction);
 	void ExecuteImmediateFromReg(const Instruction& instruction);
@@ -29,5 +32,6 @@ private:
 	void SetFlags(unsigned short result);
 	const vector<Instruction> instructions;
 	unordered_map<int, int> instructionIdByAddress;
+	int getAddressCalc(unsigned short rm);
 };
 

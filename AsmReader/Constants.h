@@ -3,6 +3,7 @@ using std::string;
 
 const int moveOp = 0b100010; // op6
 const int immediateToRegOp = 0b1011; // op4
+const int immediateToRegMemOp = 0b1100011; // op7
 const int addOp = 0;
 const int subOp = 0b101;
 const int cmpOp = 0b111;

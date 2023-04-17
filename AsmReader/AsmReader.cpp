@@ -136,6 +136,14 @@ std::vector<Instruction> AsmReader::read(string filename)
                 i += 2;
             }
             break;
+        case immediateToRegMemOp:
+            instruction.w = buffer[i] & 0b00000001;
+            instruction.mod = buffer[i + 1] >> 6;
+            instruction.rm = buffer[i + 1] & 0b00000111;
+            instruction.displacement = getDisplacement(buffer, instruction.w, instruction.mod, instruction.rm, i);
+            instruction.immediate = getData(buffer, instruction.w, i);
+            i += 1 + instruction.w;
+            break;
         case moveOp:
             parseDwInstruction(buffer, i, instruction);
             break;
@@ -202,6 +210,10 @@ unsigned char AsmReader::getOperation(unsigned char byte)
     }
     if (op6 == immediateFromRegOp) {
         return immediateFromRegOp;
+    }
+    const unsigned char op7 = byte >> 1;
+    if (op7 == immediateToRegMemOp) {
+        return immediateToRegMemOp;
     }
 
     return byte;
