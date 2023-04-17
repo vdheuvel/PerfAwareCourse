@@ -114,10 +114,10 @@ void Simulator::ExecuteMove(const Instruction& instruction)
 		}
 		else if(instruction.mod == 0){
 			if (instruction.d) {
-				registers[instruction.reg] = memory[instruction.displacement];
+				registers[instruction.reg] = memory[getAddressCalc(instruction.rm)];
 			}
 			else {
-				registers[instruction.rm] = memory[instruction.displacement];
+				memory[getAddressCalc(instruction.rm)] = registers[instruction.reg];
 			}
 		}
 	}
