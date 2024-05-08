@@ -230,18 +230,24 @@ void Printer::writeDwInstruction(const Instruction& instruction){
         else {
             registerstr = w0mod11Registers[instruction.reg];
         }
-        string addresscalcstr = addressCalc[instruction.rm];
+        string addresscalcstr = !(instruction.mod == 0 && instruction.rm == 6) ? addressCalc[instruction.rm] : "";
         if (instruction.d) {
             outfile << registerstr << ", [" << addresscalcstr;
             if (instruction.displacement != 0) {
-                outfile << " + " << instruction.displacement;
+                if (addresscalcstr != "") {
+                    outfile << " + ";
+                }
+                outfile << instruction.displacement;
             }
             outfile << "]";
         }
         else {
             outfile << "[" << addresscalcstr;
             if (instruction.displacement != 0) {
-                outfile << " + " << instruction.displacement;
+                if (addresscalcstr != "") {
+                    outfile << " + ";
+                }
+                outfile << instruction.displacement;
 
             }
             outfile << "], " << registerstr;

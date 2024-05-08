@@ -16,9 +16,9 @@ public:
 	int Execute();
 	void PrintRegisters() const;
 	int instructionPointer = 0;
+	const array<unsigned short, memorySize>& getMemory() const;
 private:
 	const static int registerCount = 8;
-	const static unsigned int memorySize = 1 << 16;
 	array<unsigned short, registerCount> registers;
 	array<unsigned short, memorySize> memory;
 	bool zeroFlag = false;

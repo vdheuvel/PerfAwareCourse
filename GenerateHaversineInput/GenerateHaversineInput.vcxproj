@@ -19,10 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>16.0</VCProjectVersion>
+    <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{7039d364-3123-4b99-a8d2-797d117ea634}</ProjectGuid>
-    <RootNamespace>AsmReader</RootNamespace>
+    <ProjectGuid>{9179bccc-ee48-4257-87e9-0421b487b3a0}</ProjectGuid>
+    <RootNamespace>GenerateHaversineInput</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -127,19 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AsmReader.cpp" />
-    <ClCompile Include="ClockCalculator.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Printer.cpp" />
-    <ClCompile Include="Simulator.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="AsmReader.h" />
-    <ClInclude Include="ClockCalculator.h" />
-    <ClInclude Include="Constants.h" />
-    <ClInclude Include="Instruction.h" />
-    <ClInclude Include="Printer.h" />
-    <ClInclude Include="Simulator.h" />
+    <ClCompile Include="GenerateHaversineInput.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

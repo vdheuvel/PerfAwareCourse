@@ -5,6 +5,7 @@
 #include"Printer.h"
 #include "Constants.h"
 #include "Simulator.h"
+#include "ClockCalculator.h"
 using std::cout;
 using std::string;
 using std::ofstream;
@@ -16,9 +17,16 @@ int main(int argc, char *argv[]) {
     auto instructions = asmReader.read(fileName);
 
     ofstream outfile;
-    auto outFileName = std::string(fileName) + "_print.asm";
+    //auto outFileName = std::string(fileName) + "_print.asm";
+    auto outFileName = std::string(fileName) + ".DATA";
     outfile.open(outFileName.c_str());
-    //Printer printer(cout);
+    Printer printer(cout);
+    ClockCalculator clockCalc;
+    for (const auto& i : instructions) {
+        int cost = clockCalc.Calculate(i);
+        printer.print(i);
+        cout << " cost:" << cost << std::endl;
+    }
     Simulator simulator(instructions);
     auto maxIndex = instructions[instructions.size() - 1].address;
     while(simulator.instructionPointer <= maxIndex) {
@@ -27,5 +35,10 @@ int main(int argc, char *argv[]) {
         cout << std::endl;
     }
     simulator.PrintRegisters();
+
+    for (const auto& byte : simulator.getMemory()) {
+        outfile << byte;
+    }
+
     outfile.close();
 }

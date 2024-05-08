@@ -210,3 +210,8 @@ void Simulator::PrintRegisters() const
 			<< (unsigned int)registers[i] << "   (" << bitset<16>(registers[i]).to_string() << ")" << std::endl;
 	}
 }
+
+const array<unsigned short, memorySize>& Simulator::getMemory() const
+{
+	return memory;
+}
