@@ -16,8 +16,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
+#include <iomanip>
 using f64 = double;
 using std::string;
+using std::ostringstream;
 
 static f64 Square(f64 A)
 {
@@ -75,8 +78,11 @@ int main(int argc, char* argv[])
     auto earthRadius = 6372.8;
     srand(seed);
 
-    string jsonInput = "{\"pairs\":[";
-    string answers = "";
+    ostringstream jsonInput;
+    jsonInput.precision(std::numeric_limits<double>::max_digits10);
+    jsonInput << "{\"pairs\":[";
+    ostringstream answers;
+    answers.precision(std::numeric_limits<double>::max_digits10);
     int multiplier[4] = { 180, 90, 180, 90 };
     f64 sum = 0;
     int centers[4] = { rand2k(), rand2k() ,rand2k() ,rand2k() };
@@ -91,28 +97,29 @@ int main(int argc, char* argv[])
 		}
 		f64 result = ReferenceHaversine(values[0], values[1], values[2], values[3], earthRadius);
         sum += result;
-		answers += std::to_string(result) + "\n";
-        jsonInput += "    {\"X0\":" + std::to_string(values[0]) + ",\"Y0\":" + std::to_string(values[1]) + ",\"X1\":" + std::to_string(values[2]) + ",\"Y1\":" + std::to_string(values[3]) + "}";
+		answers << result << "\n";
+        jsonInput << "    {\"X0\":" << values[0] << ",\"Y0\":" << values[1] << ",\"X1\":" << values[2] << ",\"Y1\":" << values[3] << "}";
         if (i < n - 1)
         {
-			jsonInput += ",";
+			jsonInput << ",";
 		}
-        jsonInput += "\n";
+        jsonInput << "\n";
     }
-    jsonInput += "]}";
+    jsonInput << "]}";
 
     // write jsonInput to file
     std::ofstream jsonFile("input.json");
-    jsonFile << jsonInput;
+    jsonFile << jsonInput.str();
     jsonFile.close();
 
     // write answers to file
     std::ofstream answerFile("answers.txt");
-    answerFile << answers;
+    answerFile << answers.str();
     answerFile.close();
 
     // write sum to file
     std::ofstream sumFile("sum.txt");
+    sumFile.precision(std::numeric_limits<double>::max_digits10);
     sumFile << std::to_string(sum);
     sumFile.close();
 
