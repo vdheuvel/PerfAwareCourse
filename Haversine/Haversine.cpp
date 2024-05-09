@@ -3,7 +3,8 @@
 #include <string>
 #include <vector>
 #include <chrono>
-#include "../ApproximateCPUTimerFreq/ApproximateCPUTimerFreq.cpp"
+#include "../Profiler/Profiler.cpp"
+#include "Haversine.h"
 
 using f64 = double;
 using std::string;
@@ -131,10 +132,24 @@ pair readPair(const string& input, int& i) {
     return p;
 }
 
+string ReadFile(std::string& fileName)
+{
+    TimeFunction();
+    string input;
+    string line;
+    char buffer[256];  // Adjust the size of buffer as needed
+    std::ifstream infile(fileName);
+    while (!infile.eof()) {
+        infile.read(buffer, sizeof(buffer) - 1);  // Read x characters into buffer
+        buffer[infile.gcount()] = '\0';  // Null-terminate the string
+        input += buffer;
+    }
+    return input;
+}
+
 int main(int argc, char* argv[])
 {
     string fileName = argv[1];
-    std::ifstream infile(fileName);
     vector<f64> answers;
     if (argc == 3) {
         std::ifstream answerfile(argv[2]);
@@ -145,64 +160,63 @@ int main(int argc, char* argv[])
             answers.push_back(value);
         }
     }
-    string line;
-    char buffer[256];  // Adjust the size of buffer as needed
 
-    string input;
 
     auto cpuFreq = getCpuTimerFreq(1000000);
     hrclock::time_point start = std::chrono::high_resolution_clock::now();
+    StartProfiling();
     auto start2 = __rdtsc();
 
-    while (!infile.eof()) {
-        infile.read(buffer, sizeof(buffer) - 1);  // Read x characters into buffer
-        buffer[infile.gcount()] = '\0';  // Null-terminate the string
-        input += buffer;
-    }
-
-    auto time1 = __rdtsc();
-
-    int i = 0;
-    if (input[0] != '{') {
-        std::cout << "Invalid input file" << std::endl;
-        return 1;
-    }
-    ++i;
-    readWhitespace(input, i);
-    readName(input, i, "pairs");
-    readWhitespace(input, i);
-    readChar(input, i, ':');
-    readWhitespace(input, i);
-    readChar(input, i, '[');
-    readWhitespace(input, i);
-    vector<pair> pairs;
-    pair p = readPair(input, i);
-    pairs.push_back(p);
-    readWhitespace(input, i);
-    while (input[i] == ',') {
-        readChar(input, i, ',');
-        readWhitespace(input, i);
-        pairs.push_back(readPair(input, i));
-        readWhitespace(input, i);
-    }
-    readWhitespace(input, i);
-    readChar(input, i, ']');
-    readWhitespace(input, i);
-    readChar(input, i, '}');
-    //std::cout << "Number of pairs: " << pairs.size() << std::endl;
-
-    auto time2 = __rdtsc();
-
+    string input = ReadFile(fileName);
     f64 sum = 0;
-    f64 earthRadius = 6372.8;
-    for (int i = 0; i < pairs.size(); ++i) {
-        f64 result = ReferenceHaversine(pairs[i].values[0], pairs[i].values[1], pairs[i].values[2], pairs[i].values[3], earthRadius);
-        sum += result;
-        //if (answers.size() > i) {
-        //    if (result != answers[i]) {
-        //        std::cout << "i : " << i << "Expected: " << answers[i] << " Got : " << result << std::endl;
-        //    }
-        //}
+    u64 time2;
+    auto time1 = __rdtsc();
+    {
+        TimeBlock("Parse json");
+        int i = 0;
+        if (input[0] != '{') {
+            std::cout << "Invalid input file" << std::endl;
+            return 1;
+        }
+        ++i;
+        readWhitespace(input, i);
+        readName(input, i, "pairs");
+        readWhitespace(input, i);
+        readChar(input, i, ':');
+        readWhitespace(input, i);
+        readChar(input, i, '[');
+        readWhitespace(input, i);
+        vector<pair> pairs;
+        pair p = readPair(input, i);
+        pairs.push_back(p);
+        readWhitespace(input, i);
+        while (input[i] == ',') {
+            readChar(input, i, ',');
+            readWhitespace(input, i);
+            pairs.push_back(readPair(input, i));
+            readWhitespace(input, i);
+        }
+        readWhitespace(input, i);
+        readChar(input, i, ']');
+        readWhitespace(input, i);
+        readChar(input, i, '}');
+        //std::cout << "Number of pairs: " << pairs.size() << std::endl;
+
+        time2 = __rdtsc();
+
+        f64 earthRadius = 6372.8;
+        {
+            TimeBlock("Calculate Haversine");
+            for (int i = 0; i < pairs.size(); ++i) {
+                f64 result = ReferenceHaversine(pairs[i].values[0], pairs[i].values[1], pairs[i].values[2], pairs[i].values[3], earthRadius);
+                sum += result;
+                //if (answers.size() > i) {
+                //    if (result != answers[i]) {
+                //        std::cout << "i : " << i << "Expected: " << answers[i] << " Got : " << result << std::endl;
+                //    }
+                //}
+            }
+        }
     }
 
     hrclock::time_point end = std::chrono::high_resolution_clock::now();
@@ -216,4 +230,5 @@ int main(int argc, char* argv[])
     std::cout << "RDTSC time taken for reading: " << double((time1 - start2) * 1000) / cpuFreq << " ms" << std::endl;
     std::cout << "RDTSC time taken for parsing: " << double((time2 - time1) * 1000) / cpuFreq << " ms" << std::endl;
     std::cout << "RDTSC time taken for calculating: " << double((end2 - time2) * 1000) / cpuFreq << " ms" << std::endl;
+    EndAndPrintResults();
 }
