@@ -27,10 +27,11 @@ struct AggregateTiming {
 static class Profiler
 {
 private:
-	static const int maxCount = 1000;
+	static const int maxCount = 100;
 	static u64 _cpuTimeFreq;
 	static u64 _cpuTimeStart;
 	static AggregateTiming _timings[maxCount];
+	static bool _openedTimings[maxCount];
 	static int _timingsCount;
 	static int _currentTimingIndex;
 	public:
@@ -62,6 +63,9 @@ private:
 		if (index >= maxCount) {
 			cout << "Error: too many timings" << std::endl;
 		}
+		if (index == 0) {
+			return;
+		}
 		Timing timing;
 		timing.name = name;
 		timing.start = start;
@@ -73,6 +77,7 @@ private:
 			_timings[parentIndex].childrenTime += end - start;
 		}
 		_currentTimingIndex = parentIndex;
+		_openedTimings[index] = false;
 	}
 
 	class Timer
@@ -95,9 +100,13 @@ private:
 	};
 	
 	static Timer _timeNamed(const string& name, int index) {
-		auto t = Timer(name, index, _currentTimingIndex);
+		if (_openedTimings[index]) {
+			return Timer("", 0, 0);
+		}
+		auto parent = _currentTimingIndex;
 		_currentTimingIndex = index;
-		return t;
+		_openedTimings[index] = true;
+		return Timer(name, index, parent);
 	}
 	static void Reset();
 
@@ -108,3 +117,4 @@ u64 Profiler::_cpuTimeStart;
 int Profiler::_timingsCount;
 AggregateTiming Profiler::_timings[maxCount];
 int Profiler::_currentTimingIndex;
+bool Profiler::_openedTimings[maxCount];

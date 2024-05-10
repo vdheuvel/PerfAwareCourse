@@ -147,6 +147,15 @@ string ReadFile(std::string& fileName)
     return input;
 }
 
+void RecursiveFunction(int depth)
+{
+	TimeFunction();
+    if (depth > 0) {
+        Sleep(10);
+		RecursiveFunction(depth - 1);
+	}
+}
+
 int main(int argc, char* argv[])
 {
     string fileName = argv[1];
@@ -218,6 +227,8 @@ int main(int argc, char* argv[])
             }
         }
     }
+
+    RecursiveFunction(3); // test recursive profiling
 
     hrclock::time_point end = std::chrono::high_resolution_clock::now();
     auto end2 = __rdtsc();
