@@ -15,12 +15,13 @@ struct Timing {
 	u64 start;
 	string name;
 	u64 end;
+	int parentIndex; // aggregate timing
 };
 
 struct AggregateTiming {
 	string name;
 	u64 time;
-	double percentage;
+	u64 childrenTime;
 };
 
 static class Profiler
@@ -31,6 +32,7 @@ private:
 	static u64 _cpuTimeStart;
 	static AggregateTiming _timings[maxCount];
 	static int _timingsCount;
+	static int _currentTimingIndex;
 	public:
 	Profiler() {
 		_timingsCount = 0;
@@ -44,12 +46,19 @@ private:
 		cout << "CPU Time Elapsed: " << cpuTimeElapsedMs << " ms" << std::endl;
 
 		for (int i = 1; i <= _timingsCount; ++i) {
-			auto time = double(_timings[i].time) * 1000 / _cpuTimeFreq;
-			_timings[i].percentage = time * 100 / cpuTimeElapsedMs;
-			cout << "Timing: " << _timings[i].name << " Time: " << time << "ms" << "(" << _timings[i].percentage << "%)" << std::endl;
+			auto &t = _timings[i];
+			auto time = double(t.time - t.childrenTime) * 1000 / _cpuTimeFreq;
+			auto percentage = time * 100 / cpuTimeElapsedMs;
+			cout << "Timing: " << _timings[i].name << " Time: " << time << "ms" << "(" << percentage << "%)";
+			if (t.childrenTime > 0) {
+				auto timeIncludingChildren = double(t.time) * 1000 / _cpuTimeFreq;
+				auto percentageInclChildren = timeIncludingChildren * 100 / cpuTimeElapsedMs;
+				cout << " ,incl. children: " << timeIncludingChildren << "ms" << "(" << percentageInclChildren << "%)";
+			}
+			cout << std::endl;
 		}
 	}
-	static void SumbitTiming(string name, int index, u64 start, u64 end) {
+	static void SumbitTiming(string name, int index, int parentIndex, u64 start, u64 end) {
 		if (index >= maxCount) {
 			cout << "Error: too many timings" << std::endl;
 		}
@@ -60,6 +69,10 @@ private:
 		_timings[index].name = name;
 		_timings[index].time += end - start;
 		_timingsCount = max(_timingsCount, index);
+		if (parentIndex > 0) {
+			_timings[parentIndex].childrenTime += end - start;
+		}
+		_currentTimingIndex = parentIndex;
 	}
 
 	class Timer
@@ -67,20 +80,24 @@ private:
 		string _name;
 		u64 _start;
 		int _index;
+		int _parentIndex;
 	public:
-		Timer(string name, int index) {
+		Timer(string name, int index, int parentIndex) {
 			_name = name;
 			_start = __rdtsc();
 			_index = index;
+			_parentIndex = parentIndex;
 		}
 		~Timer() {
 			auto end = __rdtsc();
-			Profiler::SumbitTiming(_name, _index, _start, end);
+			Profiler::SumbitTiming(_name, _index, _parentIndex, _start, end);
 		}
 	};
 	
 	static Timer _timeNamed(const string& name, int index) {
-		return Timer(name, index);
+		auto t = Timer(name, index, _currentTimingIndex);
+		_currentTimingIndex = index;
+		return t;
 	}
 	static void Reset();
 
@@ -90,3 +107,4 @@ u64 Profiler::_cpuTimeFreq;
 u64 Profiler::_cpuTimeStart;
 int Profiler::_timingsCount;
 AggregateTiming Profiler::_timings[maxCount];
+int Profiler::_currentTimingIndex;
