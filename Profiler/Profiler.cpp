@@ -35,6 +35,7 @@ struct AggregateTiming {
 	string name;
 	u64 timeExclChildren;
 	u64 timeInclChildren;
+	int hitCount;
 };
 
 static class Profiler
@@ -57,17 +58,19 @@ public:
 		u64 cpuTimeEnd = __rdtsc();
 		u64 cpuTimeElapsed = cpuTimeEnd - _cpuTimeStart;
 		double cpuTimeElapsedMs = (double)cpuTimeElapsed * 1000 / (double)_cpuTimeFreq;
+
+		cout.precision(4);
 		cout << "CPU Time Elapsed: " << cpuTimeElapsedMs << " ms" << std::endl;
 
 		for (int i = 1; i <= _timingsCount; ++i) {
 			auto& t = _timings[i];
 			auto time = double(t.timeExclChildren) * 1000 / _cpuTimeFreq;
 			auto percentage = time * 100 / cpuTimeElapsedMs;
-			cout << "Timing: " << _timings[i].name << " Time: " << time << "ms" << "(" << percentage << "%)";
+			cout << "  Timing: " << _timings[i].name << "[" << _timings[i].hitCount << "] Time: " << time << "ms" << "(" << percentage << "%)";
 			if (t.timeExclChildren != t.timeInclChildren) {
 				auto timeIncludingChildren = double(t.timeInclChildren) * 1000 / _cpuTimeFreq;
 				auto percentageInclChildren = timeIncludingChildren * 100 / cpuTimeElapsedMs;
-				cout << " ,incl. children: " << timeIncludingChildren << "ms" << "(" << percentageInclChildren << "%)";
+				cout << ", incl. children: " << timeIncludingChildren << "ms" << "(" << percentageInclChildren << "%)";
 			}
 			cout << std::endl;
 		}
@@ -91,6 +94,7 @@ public:
 		_timings[t->_index].timeInclChildren = t->_startSum + elapsed; // overwrites value if any children added to it in the meantime
 		_timingsCount = max(_timingsCount, t->_index);
 		_timings[t->_parentIndex].timeExclChildren -= elapsed; // if parentindex is 0, it's implicitly discarded
+		++_timings[t->_index].hitCount;
 
 		_currentTimingIndex = t->_parentIndex;
 		--_openedTimings[t->_index];

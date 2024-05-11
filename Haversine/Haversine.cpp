@@ -1,3 +1,4 @@
+#define PROFILER 1
 #include <iostream>
 #include <fstream>
 #include <string>
