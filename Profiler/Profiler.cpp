@@ -20,9 +20,8 @@ struct Timing {
 
 struct AggregateTiming {
 	string name;
-	u64 time;
-	u64 childrenTime;
-	u64 withChildrenTime;
+	u64 timeExclChildren;
+	u64 timeInclChildren;
 };
 
 static class Profiler
@@ -49,11 +48,11 @@ private:
 
 		for (int i = 1; i <= _timingsCount; ++i) {
 			auto &t = _timings[i];
-			auto time = double(t.time - t.childrenTime) * 1000 / _cpuTimeFreq;
+			auto time = double(t.timeExclChildren) * 1000 / _cpuTimeFreq;
 			auto percentage = time * 100 / cpuTimeElapsedMs;
 			cout << "Timing: " << _timings[i].name << " Time: " << time << "ms" << "(" << percentage << "%)";
-			if (t.childrenTime > 0) {
-				auto timeIncludingChildren = double(t.withChildrenTime) * 1000 / _cpuTimeFreq;
+			if (t.timeExclChildren != t.timeInclChildren) {
+				auto timeIncludingChildren = double(t.timeInclChildren) * 1000 / _cpuTimeFreq;
 				auto percentageInclChildren = timeIncludingChildren * 100 / cpuTimeElapsedMs;
 				cout << " ,incl. children: " << timeIncludingChildren << "ms" << "(" << percentageInclChildren << "%)";
 			}
@@ -74,13 +73,12 @@ private:
 		timing.end = end;
 		_timings[t->_index].name = t->_name;
 		auto elapsed = end - t->_start;
-		_timings[t->_index].time += elapsed;
+		_timings[t->_index].timeExclChildren += elapsed;
 		
-		_timings[t->_index].withChildrenTime = t->_startSum + elapsed; // overwrites value if any children added to it in the meantime
+		_timings[t->_index].timeInclChildren = t->_startSum + elapsed; // overwrites value if any children added to it in the meantime
 		_timingsCount = max(_timingsCount, t->_index);
-		if (t->_parentIndex > 0) {
-			_timings[t->_parentIndex].childrenTime += elapsed;
-		}
+		_timings[t->_parentIndex].timeExclChildren -= elapsed; // if parentindex is 0, it's implicitly discarded
+
 		_currentTimingIndex = t->_parentIndex;
 		--_openedTimings[t->_index];
 	}
@@ -110,7 +108,7 @@ private:
 		auto parent = _currentTimingIndex;
 		_currentTimingIndex = index;
 		++_openedTimings[index];
-		return Timer(name, index, parent, _timings[index].time);
+		return Timer(name, index, parent, _timings[index].timeExclChildren);
 	}
 	static void Reset();
 
