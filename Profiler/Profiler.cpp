@@ -1,13 +1,26 @@
+#ifndef PROFILER
+#define PROFILER 0
+#endif // !PROFILER
+
+#if PROFILER
+
 #define NameConcat2(A, B) A##B
 #define NameConcat(A, B) NameConcat2(A, B)
 #define TimeFunction() TimeBlock(__FUNCTION__)
 #define TimeBlock(name) auto NameConcat(Block, __LINE__) = Profiler::_timeNamed(name, __COUNTER__ +1) // global counter only works with 1 translation unit
-#define EndAndPrintResults() Profiler::_endAndPrintResults()
+
+
+#else
+#define TimeFunction(...) 
+#define TimeBlock(...)
+
+#endif // PROFILER
+
 #define StartProfiling() Profiler()
+#define EndAndPrintResults() Profiler::_endAndPrintResults()
 #include "../ApproximateCPUTimerFreq/ApproximateCPUTimerFreq.cpp"
 #include <string>
 #include <iostream>
-
 using std::string;
 using std::cout;
 
@@ -34,7 +47,7 @@ private:
 	static int _openedTimings[maxCount];
 	static int _timingsCount;
 	static int _currentTimingIndex;
-	public:
+public:
 	Profiler() {
 		_timingsCount = 0;
 		_cpuTimeFreq = getCpuTimerFreq(1000000);
@@ -47,7 +60,7 @@ private:
 		cout << "CPU Time Elapsed: " << cpuTimeElapsedMs << " ms" << std::endl;
 
 		for (int i = 1; i <= _timingsCount; ++i) {
-			auto &t = _timings[i];
+			auto& t = _timings[i];
 			auto time = double(t.timeExclChildren) * 1000 / _cpuTimeFreq;
 			auto percentage = time * 100 / cpuTimeElapsedMs;
 			cout << "Timing: " << _timings[i].name << " Time: " << time << "ms" << "(" << percentage << "%)";
@@ -74,7 +87,7 @@ private:
 		_timings[t->_index].name = t->_name;
 		auto elapsed = end - t->_start;
 		_timings[t->_index].timeExclChildren += elapsed;
-		
+
 		_timings[t->_index].timeInclChildren = t->_startSum + elapsed; // overwrites value if any children added to it in the meantime
 		_timingsCount = max(_timingsCount, t->_index);
 		_timings[t->_parentIndex].timeExclChildren -= elapsed; // if parentindex is 0, it's implicitly discarded
@@ -103,7 +116,7 @@ private:
 			Profiler::SumbitTiming(this, end);
 		}
 	};
-	
+
 	static Timer _timeNamed(const string& name, int index) {
 		auto parent = _currentTimingIndex;
 		_currentTimingIndex = index;

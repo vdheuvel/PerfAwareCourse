@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <thread>
 #include "../Profiler/Profiler.cpp"
 #include "Haversine.h"
 
@@ -10,6 +11,7 @@ using f64 = double;
 using std::string;
 using std::vector;
 using hrclock = std::chrono::high_resolution_clock;
+using namespace std::chrono_literals;
 
 static f64 Square(f64 A)
 {
@@ -151,8 +153,8 @@ void RecursiveFunction(int depth)
 {
 	TimeFunction();
     if (depth > 0) {
-        Sleep(10);
-		RecursiveFunction(depth - 1);
+        std::this_thread::sleep_for(10ms);
+        RecursiveFunction(depth - 1);
 	}
 }
 
@@ -170,16 +172,9 @@ int main(int argc, char* argv[])
         }
     }
 
-
-    auto cpuFreq = getCpuTimerFreq(1000000);
-    hrclock::time_point start = std::chrono::high_resolution_clock::now();
     StartProfiling();
-    auto start2 = __rdtsc();
-
     string input = ReadFile(fileName);
     f64 sum = 0;
-    u64 time2;
-    auto time1 = __rdtsc();
     {
         TimeBlock("Parse json");
         int i = 0;
@@ -211,8 +206,6 @@ int main(int argc, char* argv[])
         readChar(input, i, '}');
         //std::cout << "Number of pairs: " << pairs.size() << std::endl;
 
-        time2 = __rdtsc();
-
         f64 earthRadius = 6372.8;
         {
             TimeBlock("Calculate Haversine");
@@ -230,16 +223,5 @@ int main(int argc, char* argv[])
 
     RecursiveFunction(3); // test recursive profiling
 
-    hrclock::time_point end = std::chrono::high_resolution_clock::now();
-    auto end2 = __rdtsc();
-    // get time taken in milliseconds
-    auto time_taken = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout.precision(std::numeric_limits<double>::max_digits10);
-    std::cout << "Sum: " << sum << std::endl;
-    std::cout << "Chrono time taken: " << time_taken << " ms" << std::endl;
-    std::cout << "RDTSC time taken: " << double((end2 - start2) * 1000) / cpuFreq << " ms" << std::endl;
-    std::cout << "RDTSC time taken for reading: " << double((time1 - start2) * 1000) / cpuFreq << " ms" << std::endl;
-    std::cout << "RDTSC time taken for parsing: " << double((time2 - time1) * 1000) / cpuFreq << " ms" << std::endl;
-    std::cout << "RDTSC time taken for calculating: " << double((end2 - time2) * 1000) / cpuFreq << " ms" << std::endl;
     EndAndPrintResults();
 }
