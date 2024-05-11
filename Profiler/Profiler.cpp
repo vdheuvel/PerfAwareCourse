@@ -22,6 +22,7 @@ struct AggregateTiming {
 	string name;
 	u64 time;
 	u64 childrenTime;
+	u64 withChildrenTime;
 };
 
 static class Profiler
@@ -31,7 +32,7 @@ private:
 	static u64 _cpuTimeFreq;
 	static u64 _cpuTimeStart;
 	static AggregateTiming _timings[maxCount];
-	static bool _openedTimings[maxCount];
+	static int _openedTimings[maxCount];
 	static int _timingsCount;
 	static int _currentTimingIndex;
 	public:
@@ -52,61 +53,64 @@ private:
 			auto percentage = time * 100 / cpuTimeElapsedMs;
 			cout << "Timing: " << _timings[i].name << " Time: " << time << "ms" << "(" << percentage << "%)";
 			if (t.childrenTime > 0) {
-				auto timeIncludingChildren = double(t.time) * 1000 / _cpuTimeFreq;
+				auto timeIncludingChildren = double(t.withChildrenTime) * 1000 / _cpuTimeFreq;
 				auto percentageInclChildren = timeIncludingChildren * 100 / cpuTimeElapsedMs;
 				cout << " ,incl. children: " << timeIncludingChildren << "ms" << "(" << percentageInclChildren << "%)";
 			}
 			cout << std::endl;
 		}
 	}
-	static void SumbitTiming(string name, int index, int parentIndex, u64 start, u64 end) {
-		if (index >= maxCount) {
+	class Timer;
+	static void SumbitTiming(Timer* t, u64 end) {
+		if (t->_index >= maxCount) {
 			cout << "Error: too many timings" << std::endl;
 		}
-		if (index == 0) {
+		if (t->_index == 0) {
 			return;
 		}
 		Timing timing;
-		timing.name = name;
-		timing.start = start;
+		timing.name = t->_name;
+		timing.start = t->_start;
 		timing.end = end;
-		_timings[index].name = name;
-		_timings[index].time += end - start;
-		_timingsCount = max(_timingsCount, index);
-		if (parentIndex > 0) {
-			_timings[parentIndex].childrenTime += end - start;
+		_timings[t->_index].name = t->_name;
+		auto elapsed = end - t->_start;
+		_timings[t->_index].time += elapsed;
+		
+		_timings[t->_index].withChildrenTime = t->_startSum + elapsed; // overwrites value if any children added to it in the meantime
+		_timingsCount = max(_timingsCount, t->_index);
+		if (t->_parentIndex > 0) {
+			_timings[t->_parentIndex].childrenTime += elapsed;
 		}
-		_currentTimingIndex = parentIndex;
-		_openedTimings[index] = false;
+		_currentTimingIndex = t->_parentIndex;
+		--_openedTimings[t->_index];
 	}
 
 	class Timer
 	{
+	public:
 		string _name;
 		u64 _start;
 		int _index;
 		int _parentIndex;
-	public:
-		Timer(string name, int index, int parentIndex) {
+		u64 _startSum;
+		Timer(string name, int index, int parentIndex, u64 startSum) {
 			_name = name;
 			_start = __rdtsc();
 			_index = index;
 			_parentIndex = parentIndex;
+			_startSum = startSum;
 		}
 		~Timer() {
 			auto end = __rdtsc();
-			Profiler::SumbitTiming(_name, _index, _parentIndex, _start, end);
+			Profiler::SumbitTiming(this, end);
 		}
 	};
 	
 	static Timer _timeNamed(const string& name, int index) {
-		if (_openedTimings[index]) {
-			return Timer("", 0, 0);
-		}
 		auto parent = _currentTimingIndex;
 		_currentTimingIndex = index;
-		_openedTimings[index] = true;
-		return Timer(name, index, parent);
+		++_openedTimings[index];
+		return Timer(name, index, parent, _timings[index].time);
 	}
 	static void Reset();
 
@@ -117,4 +121,4 @@ u64 Profiler::_cpuTimeStart;
 int Profiler::_timingsCount;
 AggregateTiming Profiler::_timings[maxCount];
 int Profiler::_currentTimingIndex;
-bool Profiler::_openedTimings[maxCount];
+int Profiler::_openedTimings[maxCount];
