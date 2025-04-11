@@ -140,13 +140,24 @@ string ReadFile(std::string& fileName)
     TimeFunction();
     string input;
     string line;
-    char buffer[256];  // Adjust the size of buffer as needed
-    std::ifstream infile(fileName);
-    while (!infile.eof()) {
-        infile.read(buffer, sizeof(buffer) - 1);  // Read x characters into buffer
-        buffer[infile.gcount()] = '\0';  // Null-terminate the string
-        input += buffer;
-    }
+	FILE* file = fopen(fileName.c_str(), "rb");
+#if _WIN32
+    struct __stat64 Stat;
+	_stat64(fileName.c_str(), &Stat);
+#else
+	struct stat Stat;
+	stat(fileName.c_str(), &Stat);
+#endif
+	TimeBandwidth("fread", Stat.st_size);
+	auto buffer = new char[Stat.st_size];
+	if (fread(buffer, Stat.st_size, 1, file) != 1) {
+		std::cout << "Error reading file" << std::endl;
+        delete[] buffer;
+		return "";
+	}
+
+	input = string(buffer, Stat.st_size);
+    
     return input;
 }
 
@@ -209,8 +220,8 @@ int main(int argc, char* argv[])
 
         f64 earthRadius = 6372.8;
         {
-            TimeBlock("Calculate Haversine");
             for (int i = 0; i < pairs.size(); ++i) {
+                TimeBandwidth("Calculate Haversine", 32);
                 f64 result = ReferenceHaversine(pairs[i].values[0], pairs[i].values[1], pairs[i].values[2], pairs[i].values[3], earthRadius);
                 sum += result;
                 //if (answers.size() > i) {
@@ -222,7 +233,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    RecursiveFunction(3); // test recursive profiling
+    //RecursiveFunction(3); // test recursive profiling
 
     EndAndPrintResults();
 }
