@@ -54,8 +54,12 @@ private:
 public:
 	Profiler() {
 		_timingsCount = 0;
-		_cpuTimeFreq = getCpuTimerFreq(1000000);
+		//_cpuTimeFreq = getCpuTimerFreq(1000000);
+		LARGE_INTEGER freq;
+		QueryPerformanceFrequency(&freq);
+        _cpuTimeFreq = freq.QuadPart;
 		_cpuTimeStart = GetQueryPerformanceCounter();
+		cout << "start profiler" << std::endl;
 	}
 	static u64 GetQueryPerformanceCounter() {
 		u64 result;
@@ -68,25 +72,28 @@ public:
 		u64 cpuTimeElapsed = cpuTimeEnd - _cpuTimeStart;
 		double cpuTimeElapsedMs = (double)cpuTimeElapsed / 10000;
 
-		//cout.precision(4);
-		cout << "CPU Time Elapsed: " << cpuTimeElapsedMs << " ms" << std::endl;
+		cout.precision(4);
+		cout.setf(std::ios::fixed, std::ios::floatfield);
+		cout << "CPU time frequency: " << _cpuTimeFreq << std::endl;
+		cout << "CPU Time Elapsed: " << cpuTimeElapsed << "ticks, " << cpuTimeElapsedMs << " ms" << std::endl;
 
 		for (int i = 1; i <= _timingsCount; ++i) {
 			auto& t = _timings[i];
 			auto time = double(t.timeExclChildren) * 1000 / _cpuTimeFreq;
 			auto percentage = time * 100 / cpuTimeElapsedMs;
-			cout << "  Timing: " << _timings[i].name << "[" << _timings[i].hitCount << "] Time: " << time << "ms" << "(" << percentage << "%)";
+			cout << "  Timing: " << _timings[i].name << "[" << _timings[i].hitCount << "] Time: " << t.timeExclChildren  << " ticks, " << time << "ms" << "(" << percentage << "%)";
 			if (t.timeExclChildren != t.timeInclChildren) {
 				auto timeIncludingChildren = double(t.timeInclChildren) * 1000 / _cpuTimeFreq;
 				auto percentageInclChildren = timeIncludingChildren * 100 / cpuTimeElapsedMs;
-				cout << ", incl. children: " << timeIncludingChildren << "ms" << "(" << percentageInclChildren << "%)";
+				cout << ", incl. children: " << t.timeInclChildren << " ticks, " << timeIncludingChildren << "ms" << "(" << percentageInclChildren << "%)";
 			}
 			if (t.byteCount > 0) {
 				const int megabyte = 1024 * 1024;
 				const int gigabtye = 1024 * megabyte;
-				auto timeIncludingChildren = double(t.timeInclChildren) * 1000 / _cpuTimeFreq;
+				auto timeIncludingChildren = double(t.timeInclChildren) / _cpuTimeFreq;
 
-				cout << std::setprecision(3) << ", Processed " << t.byteCount / megabyte << "MB at " << t.byteCount / timeIncludingChildren / gigabtye << "GB/s";
+				auto gb = double(t.byteCount) / gigabtye;
+				cout << std::setprecision(3) << ", Processed " << gb << "GB at " << gb / timeIncludingChildren << "GB/s";
 			}
 			cout << std::endl;
 		}

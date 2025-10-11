@@ -184,6 +184,7 @@ int main(int argc, char* argv[])
         }
     }
 
+    cout << "read answers" << std::endl; 
     StartProfiling();
     string input = ReadFile(fileName);
     f64 sum = 0;
