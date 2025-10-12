@@ -54,11 +54,11 @@ private:
 public:
 	Profiler() {
 		_timingsCount = 0;
-		//_cpuTimeFreq = getCpuTimerFreq(1000000);
-		LARGE_INTEGER freq;
-		QueryPerformanceFrequency(&freq);
-        _cpuTimeFreq = freq.QuadPart;
-		_cpuTimeStart = GetQueryPerformanceCounter();
+		_cpuTimeFreq = getCpuTimerFreq(1000000);
+		//LAsRGE_INTEGER freq;
+		//QueryPerformanceFrequency(&freq);
+        //_cpuTimeFreq = freq.QuadPart;
+		_cpuTimeStart = __rdtsc();;
 		cout << "start profiler" << std::endl;
 	}
 	static u64 GetQueryPerformanceCounter() {
@@ -68,9 +68,9 @@ public:
 		return li.QuadPart;
 	}
 	static void _endAndPrintResults() {
-		u64 cpuTimeEnd = GetQueryPerformanceCounter();
+		u64 cpuTimeEnd = __rdtsc();
 		u64 cpuTimeElapsed = cpuTimeEnd - _cpuTimeStart;
-		double cpuTimeElapsedMs = (double)cpuTimeElapsed / 10000;
+		double cpuTimeElapsedMs = (double)cpuTimeElapsed * 1000 / _cpuTimeFreq;
 
 		cout.precision(4);
 		cout.setf(std::ios::fixed, std::ios::floatfield);
@@ -135,14 +135,14 @@ public:
 		u64 _byteCount;
 		Timer(string name, int index, int parentIndex, u64 startSum, u64 byteCount = 0) {
 			_name = name;
-			_start = GetQueryPerformanceCounter();
+			_start = __rdtsc();
 			_index = index;
 			_parentIndex = parentIndex;
 			_startSum = startSum;
 			_byteCount = byteCount;
 		}
 		~Timer() {
-			auto end = GetQueryPerformanceCounter();
+			auto end = __rdtsc();
 			Profiler::SubmitTiming(this, end);
 		}
 	};
