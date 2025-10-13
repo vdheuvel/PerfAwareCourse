@@ -6,6 +6,7 @@
 #include <chrono>
 #include <thread>
 #include "../Profiler/Profiler.cpp"
+//#include "../Profiler/RepetitionTester.cpp"
 #include "Haversine.h"
 
 using f64 = double;
@@ -148,8 +149,9 @@ string ReadFile(std::string& fileName)
 	struct stat Stat;
 	stat(fileName.c_str(), &Stat);
 #endif
-	TimeBandwidth("fread", Stat.st_size);
 	auto buffer = new char[Stat.st_size];
+	TimeBandwidth("fread", Stat.st_size);
+
 	if (fread(buffer, Stat.st_size, 1, file) != 1) {
 		std::cout << "Error reading file" << std::endl;
         delete[] buffer;

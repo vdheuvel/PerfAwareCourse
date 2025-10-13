@@ -58,7 +58,7 @@ public:
 		//LAsRGE_INTEGER freq;
 		//QueryPerformanceFrequency(&freq);
         //_cpuTimeFreq = freq.QuadPart;
-		_cpuTimeStart = __rdtsc();;
+		_cpuTimeStart = __rdtsc();
 		cout << "start profiler" << std::endl;
 	}
 	static u64 GetQueryPerformanceCounter() {
@@ -81,7 +81,7 @@ public:
 			auto& t = _timings[i];
 			auto time = double(t.timeExclChildren) * 1000 / _cpuTimeFreq;
 			auto percentage = time * 100 / cpuTimeElapsedMs;
-			cout << "  Timing: " << _timings[i].name << "[" << _timings[i].hitCount << "] Time: " << t.timeExclChildren  << " ticks, " << time << "ms" << "(" << percentage << "%)";
+			cout << "  Timing: " << t.name << "[" << t.hitCount << "] Time: " << t.timeExclChildren  << " ticks, " << time << "ms" << "(" << percentage << "%)";
 			if (t.timeExclChildren != t.timeInclChildren) {
 				auto timeIncludingChildren = double(t.timeInclChildren) * 1000 / _cpuTimeFreq;
 				auto percentageInclChildren = timeIncludingChildren * 100 / cpuTimeElapsedMs;
@@ -113,7 +113,7 @@ public:
 		_timings[t->_index].name = t->_name;
 		auto elapsed = end - t->_start;
 		_timings[t->_index].timeExclChildren += elapsed;
-		_timings[t->_parentIndex].byteCount += t->_byteCount;
+		_timings[t->_index].byteCount += t->_byteCount;
 
 		_timings[t->_index].timeInclChildren = t->_startSum + elapsed; // overwrites value if any children added to it in the meantime
 		_timingsCount = max(_timingsCount, t->_index);
