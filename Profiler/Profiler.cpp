@@ -17,9 +17,7 @@
 
 #endif // PROFILER
 
-#define StartProfiling() Profiler()
 #define EndAndPrintResults() Profiler::_endAndPrintResults()
-#include "../ApproximateCPUTimerFreq/ApproximateCPUTimerFreq.cpp"
 #include <string>
 #include <iostream>
 #include <iomanip>
@@ -45,16 +43,15 @@ static class Profiler
 {
 private:
 	static const int maxCount = 100;
-	static u64 _cpuTimeFreq;
 	static u64 _cpuTimeStart;
 	static AggregateTiming _timings[maxCount];
 	static int _openedTimings[maxCount];
 	static int _timingsCount;
 	static int _currentTimingIndex;
 public:
+	static u64 _cpuTimeFreq;
 	Profiler() {
 		_timingsCount = 0;
-		_cpuTimeFreq = getCpuTimerFreq(1000000);
 		//LAsRGE_INTEGER freq;
 		//QueryPerformanceFrequency(&freq);
         //_cpuTimeFreq = freq.QuadPart;

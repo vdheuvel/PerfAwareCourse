@@ -5,8 +5,9 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include "../ApproximateCPUTimerFreq/ApproximateCPUTimerFreq.cpp"
 #include "../Profiler/Profiler.cpp"
-//#include "../Profiler/RepetitionTester.cpp"
+#include "../Profiler/RepetitionTester.cpp"
 #include "Haversine.h"
 
 using f64 = double;
@@ -14,6 +15,8 @@ using std::string;
 using std::vector;
 using hrclock = std::chrono::high_resolution_clock;
 using namespace std::chrono_literals;
+
+u64 cpuTimeFreq;
 
 static f64 Square(f64 A)
 {
@@ -151,12 +154,19 @@ string ReadFile(std::string& fileName)
 #endif
 	auto buffer = new char[Stat.st_size];
 	TimeBandwidth("fread", Stat.st_size);
-
-	if (fread(buffer, Stat.st_size, 1, file) != 1) {
-		std::cout << "Error reading file" << std::endl;
-        delete[] buffer;
-		return "";
-	}
+    RepetitionTester tester(10, Stat.st_size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+	    if (fread(buffer, Stat.st_size, 1, file) != 1) {
+		    std::cout << "Error reading file" << std::endl;
+            delete[] buffer;
+		    return "";
+	    }
+        rewind(file);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
 
 	input = string(buffer, Stat.st_size);
     
@@ -187,7 +197,9 @@ int main(int argc, char* argv[])
     }
 
     cout << "read answers" << std::endl; 
-    StartProfiling();
+    cpuTimeFreq = getCpuTimerFreq(1000000);
+    Profiler();
+    Profiler::_cpuTimeFreq = cpuTimeFreq;
     string input = ReadFile(fileName);
     f64 sum = 0;
     {
