@@ -110,6 +110,6 @@ public:
             << "Max time: " << result.maxTime * 1000 / cpuTimeFrequency << " ms" << std::endl
             << "First time " << result.firstTime * 1000 / cpuTimeFrequency << " ms" << std::endl
             << "Count: " << result.count << std::endl
-            << "In " << (result.endTime - result.startTime) / cpuTimeFrequency << "s";
+            << "In " << (result.endTime - result.startTime) / cpuTimeFrequency << "s" << std::endl;
     }
 };

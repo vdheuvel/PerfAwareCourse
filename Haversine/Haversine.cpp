@@ -152,23 +152,38 @@ string ReadFile(std::string& fileName)
 	struct stat Stat;
 	stat(fileName.c_str(), &Stat);
 #endif
-	auto buffer = new char[Stat.st_size];
-	TimeBandwidth("fread", Stat.st_size);
-    RepetitionTester tester(10, Stat.st_size, cpuTimeFreq);
-    tester.Start();
-    while (!tester.IsDone()) {
-	    if (fread(buffer, Stat.st_size, 1, file) != 1) {
-		    std::cout << "Error reading file" << std::endl;
-            delete[] buffer;
-		    return "";
-	    }
-        rewind(file);
-        tester.SubmitRepetition();
-    }
-    tester.Finish();
-    tester.Print();
+    char* buffer = (char*)malloc(Stat.st_size);
+    while (true) {
+        for(int i = 0; i < 2; ++i) {
+            if (i == 1) {
+                cout << "start malloc run" << std::endl;
+            }
+            else {
+                cout << "start reuse run" << std::endl;
+            }
 
-	input = string(buffer, Stat.st_size);
+            Sleep(500);
+	        TimeBandwidth("fread", Stat.st_size);
+            RepetitionTester tester(10, Stat.st_size, cpuTimeFreq);
+            tester.Start();
+            while (!tester.IsDone()) {
+                if (i == 1) {
+                    buffer = (char*)malloc(Stat.st_size);
+                }
+	            if (fread(buffer, Stat.st_size, 1, file) != 1) {
+		            std::cout << "Error reading file" << std::endl;
+                    delete[] buffer;
+		            return "";
+	            }
+                rewind(file);
+                tester.SubmitRepetition();
+            }
+            tester.Finish();
+            tester.Print();
+
+	        input = string(buffer, Stat.st_size);
+        }
+    }
     
     return input;
 }
