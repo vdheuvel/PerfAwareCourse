@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+
+/GenerateHaversineInput/answers.txt
+/GenerateHaversineInput/input.json
+/GenerateHaversineInput/sum.txt
