@@ -8,7 +8,8 @@
 #include <thread>
 #include <Windows.h>
 #include <intrin.h>
-#include "../ApproximateCPUTimerFreq/ApproximateCPUTimerFreq.cpp"
+#include "../Profiler/ApproximateCPUTimerFreq.cpp"
+#include <iomanip>
 #include "../Profiler/Profiler.cpp"
 #include <psapi.h>
 #include "../Profiler/RepetitionTester.cpp"
