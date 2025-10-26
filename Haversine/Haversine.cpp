@@ -1,12 +1,16 @@
 #define PROFILER 1
+#define WIN32_LEAN_AND_MEAN
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <chrono>
 #include <thread>
+#include <Windows.h>
+#include <intrin.h>
 #include "../ApproximateCPUTimerFreq/ApproximateCPUTimerFreq.cpp"
 #include "../Profiler/Profiler.cpp"
+#include <psapi.h>
 #include "../Profiler/RepetitionTester.cpp"
 #include "Haversine.h"
 

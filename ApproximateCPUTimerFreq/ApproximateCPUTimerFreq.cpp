@@ -1,9 +1,3 @@
-// ApproximateCPUTimerFreq.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
-#include <intrin.h>
-#include <Windows.h>
-
 using u64 = unsigned long long;
 
 static u64 getOsTimerFreq(void) {

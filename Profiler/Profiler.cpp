@@ -23,6 +23,7 @@
 #include <iomanip>
 using std::string;
 using std::cout;
+using u64 = unsigned long long;
 
 struct Timing {
 	u64 start;
@@ -52,7 +53,7 @@ public:
 	static u64 _cpuTimeFreq;
 	Profiler() {
 		_timingsCount = 0;
-		//LAsRGE_INTEGER freq;
+		//LARGE_INTEGER freq;
 		//QueryPerformanceFrequency(&freq);
         //_cpuTimeFreq = freq.QuadPart;
 		_cpuTimeStart = __rdtsc();
