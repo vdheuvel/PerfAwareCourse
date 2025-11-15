@@ -21,34 +21,49 @@ using hrclock = std::chrono::high_resolution_clock;
 using namespace std::chrono_literals;
 
 u64 cpuTimeFreq;
-const int pageCount = 128;
+const int pageCount = 1024;
 const int pageSize = 4096;
 
-void TestAscending() {
-    char* buffer = (char*)VirtualAlloc(NULL, pageSize * pageCount, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    RepetitionTester tester(10, pageSize, cpuTimeFreq);
+void TestAscending(bool useMalloc) {
+    RepetitionTester tester(10, pageSize * pageCount, cpuTimeFreq);
     tester.Start();
-    int start = tester.GetPageFaultCountForProcess();
-    for (int i = 0; i < pageCount; ++i) {
-        TimeBandwidth("fread", pageSize);
-        buffer[i * pageSize] = rand();
-        int count = tester.GetPageFaultCountForProcess() - start;
-        std::cout << "Written page " << i << ", total page faults: " << count << std::endl;
+    while (!tester.IsDone()) {
+        char* buffer = useMalloc ? (char*)malloc(pageSize * pageCount) :
+            (char*)VirtualAlloc(NULL, pageSize * pageCount, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        int start = tester.GetPageFaultCountForProcess();
+        for (int i = 0; i < pageCount; ++i) {
+            TimeBandwidth("fread", pageSize);
+            buffer[i * pageSize] = rand();
+            for (int j = 0; j < pageSize; ++j) {
+                buffer[i * pageSize + j] = j;
+            }
+            int count = tester.GetPageFaultCountForProcess() - start;
+            //std::cout << "Written page " << i << ", total page faults: " << count << std::endl;
+        }
+        tester.SubmitRepetition();
     }
     tester.Finish();
     tester.Print();
 }
 
-void TestDescending() {
-    char* buffer = (char*)VirtualAlloc(NULL, pageSize * pageCount, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    RepetitionTester tester(10, pageSize, cpuTimeFreq);
+void TestDescending(bool useMalloc) {
+    RepetitionTester tester(10, pageSize * pageCount, cpuTimeFreq);
     tester.Start();
     int start = tester.GetPageFaultCountForProcess();
-    for (int i = pageCount - 1; i >= 0; --i) {
-        TimeBandwidth("fread", pageSize);
-        buffer[i * pageSize] = rand();
-        int count = tester.GetPageFaultCountForProcess() - start;
-        std::cout << "Written page " << i << ", total page faults: " << count << std::endl;
+    while (!tester.IsDone()) {
+
+        char* buffer = useMalloc ? (char*)malloc(pageSize * pageCount) :
+            (char*)VirtualAlloc(NULL, pageSize * pageCount, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        for (int i = pageCount - 1; i >= 0; --i) {
+            TimeBandwidth("fread", pageSize);
+            buffer[i * pageSize] = rand();
+            for (int j = 0; j < pageSize; ++j) {
+                buffer[i * pageSize + j] = j;
+            }
+            int count = tester.GetPageFaultCountForProcess() - start;
+            //std::cout << "Written page " << i << ", total page faults: " << count << std::endl;
+        }
+        tester.SubmitRepetition();
     }
     tester.Finish();
     tester.Print();
@@ -58,7 +73,14 @@ void TestDescending() {
 
 int main()
 {
+    // note: memory will fill up with all tests
     cpuTimeFreq = getCpuTimerFreq(1000000);
-    TestAscending();
-    TestDescending();
+    std::cout << "Test ascending with VirtualAlloc" << std::endl;
+    TestAscending(false); // 0.0007 ms because of prefetching
+    std::cout << "Test descending with VirtualAlloc" << std::endl;
+    TestDescending(false); // 0.0013 ms
+    std::cout << "Test ascending with malloc" << std::endl;
+    TestAscending(true); // 0.0008 ms
+    std::cout << "Test descending with malloc" << std::endl;
+    TestDescending(true); // 0.0013
 }
