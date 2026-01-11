@@ -27,6 +27,12 @@ u64 cpuTimeFreq;
 int pageCount = 1024;
 int pageSize = 4096;
 
+extern "C" void MoveAllBytesASM(u64 count, u8* data);
+extern "C" void NoOpASM(u64 count, u8* data);
+extern "C" void CmpASM(u64 count, u8* data);
+extern "C" void DecASM(u64 count, u8* data);
+
+
 // to convince compiler that const size is not const, so it uses 3 byte compare (same as casey's)
 // otherwise it'll use 7 byte compare
 u64 opaque(u64 x) { return x; } 
@@ -45,6 +51,54 @@ void Test(u64 size) {
     tester.Print();
 }
 
+void TestMoveAllBytesASM(u64 size) {
+    RepetitionTester tester(10, pageSize * pageCount, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        char* buffer = (char*)VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        MoveAllBytesASM(size, (u8*)buffer);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestMoveAllBytesNOPASM(u64 size) {
+    RepetitionTester tester(10, pageSize * pageCount, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        char* buffer = (char*)VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        NoOpASM(size, (u8*)buffer);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestCmpASM(u64 size) {
+    RepetitionTester tester(10, pageSize * pageCount, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        char* buffer = (char*)VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        CmpASM(size, (u8*)buffer);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestDecASM(u64 size) {
+    RepetitionTester tester(10, pageSize * pageCount, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        char* buffer = (char*)VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        DecASM(size, (u8*)buffer);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
 
 int main()
 {
@@ -52,5 +106,9 @@ int main()
     cout << "cpu time freq " << cpuTimeFreq << std::endl;
 
     u64 size = pageCount * pageSize;
-    Test(opaque(size));
+    //Test(opaque(size)); // 4.5; Casey: 3.5
+    //TestMoveAllBytesASM(opaque(size)); // 4.5; Casey: 3.5
+    //TestMoveAllBytesNOPASM(opaque(size)); // 8.7 ; Casey: 3.9
+    //TestCmpASM(opaque(size)); // 8.7; Casey: 3.9
+    TestDecASM(opaque(size)); // 4.4; Casey: 3.9
 }
