@@ -1,9 +1,12 @@
 BITS 64
 
 global MoveAllBytesASM
-global NoOpASM
+global NoOp3x1ASM
 global CmpASM
 global DecASM
+global NoOp1x3ASM
+global NoOp1x9ASM
+global NoOp3x1CondASM
 
 section .text
 
@@ -16,7 +19,7 @@ MoveAllBytesASM:
   jb .loop
   ret
 
-NoOpASM:
+NoOp3x1ASM:
   xor rax, rax
 .loop:
   db 0x0f, 0x1f, 0x00; NOP instruction (3-byte)
@@ -38,4 +41,44 @@ DecASM:
 .loop:
   dec rcx
   jnz .loop
+  ret
+
+NoOp1x3ASM:
+  xor rax, rax
+.loop:
+  nop
+  nop
+  nop
+  inc rax  
+  cmp rax,rcx
+  jb .loop
+  ret
+
+NoOp1x9ASM:
+  xor rax, rax
+.loop:
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  inc rax  
+  cmp rax,rcx
+  jb .loop
+  ret
+
+NoOp3x1CondASM:
+  xor rax, rax
+.loop:
+  cmp [rdx + rax], 0
+  je .skip
+  db 0x0f, 0x1f, 0x00; NOP instruction (3-byte)
+  .skip:
+  inc rax  
+  cmp rax,rcx
+  jb .loop
   ret

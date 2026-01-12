@@ -15,7 +15,7 @@
 #include "../Profiler/RepetitionTester.cpp"
 
 using f64 = double;
-using u8 = short;
+using u8 = uint8_t;
 using std::string;
 using std::vector;
 using std::cout;
@@ -27,10 +27,16 @@ u64 cpuTimeFreq;
 int pageCount = 1024;
 int pageSize = 4096;
 
+u8 branch[1024 * 4096];
+
+// assemble: C:\Users\JeroenvandenHeuvel\AppData\Local\bin\NASM > nasm - f win64 "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopAssemblyRaw.asm" - o "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopAssemblyRaw.obj"
 extern "C" void MoveAllBytesASM(u64 count, u8* data);
-extern "C" void NoOpASM(u64 count, u8* data);
+extern "C" void NoOp3x1ASM(u64 count, u8* data);
 extern "C" void CmpASM(u64 count, u8* data);
 extern "C" void DecASM(u64 count, u8* data);
+extern "C" void NoOp1x3ASM(u64 count, u8* data);
+extern "C" void NoOp1x9ASM(u64 count, u8* data);
+extern "C" void NoOp3x1CondASM(u64 count, u8* data);
 
 
 // to convince compiler that const size is not const, so it uses 3 byte compare (same as casey's)
@@ -63,12 +69,34 @@ void TestMoveAllBytesASM(u64 size) {
     tester.Print();
 }
 
-void TestMoveAllBytesNOPASM(u64 size) {
+void TestMoveAllBytesNOP3x1ASM(u64 size) {
     RepetitionTester tester(10, pageSize * pageCount, cpuTimeFreq);
     tester.Start();
     while (!tester.IsDone()) {
         char* buffer = (char*)VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-        NoOpASM(size, (u8*)buffer);
+        NoOp3x1ASM(size, (u8*)buffer);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+void TestMoveAllBytesNOP1x3ASM(u64 size) {
+    RepetitionTester tester(10, pageSize * pageCount, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        char* buffer = (char*)VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        NoOp1x3ASM(size, (u8*)buffer);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+void TestMoveAllBytesNOP1x9ASM(u64 size) {
+    RepetitionTester tester(10, pageSize * pageCount, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        char* buffer = (char*)VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        NoOp1x9ASM(size, (u8*)buffer);
         tester.SubmitRepetition();
     }
     tester.Finish();
@@ -99,6 +127,39 @@ void TestDecASM(u64 size) {
     tester.Print();
 }
 
+void TestCondASM(u64 size) {
+    RepetitionTester tester(10, pageSize * pageCount, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        NoOp3x1CondASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+
+void setBranchArray(u64 size, int option) {
+    for (u64 i = 0; i < size; ++i) {
+        switch (option) {
+        case 0:
+            branch[i] = 0;
+            break;
+        case 1:
+            branch[i] = 1;
+            break;
+        case 2:
+            branch[i] = (i % 2) == 0;
+            break;
+        case 3:
+            branch[i] = (rand() % 2) == 0;
+            break;
+        case 4:
+            branch[i] = (i % 3) == 0;
+            break;
+        }
+    }
+}
 
 int main()
 {
@@ -106,9 +167,24 @@ int main()
     cout << "cpu time freq " << cpuTimeFreq << std::endl;
 
     u64 size = pageCount * pageSize;
+    // timings are on work laptop with i7-1255U
     //Test(opaque(size)); // 4.5; Casey: 3.5
     //TestMoveAllBytesASM(opaque(size)); // 4.5; Casey: 3.5
-    //TestMoveAllBytesNOPASM(opaque(size)); // 8.7 ; Casey: 3.9
+    //TestMoveAllBytesNOP3x1ASM(opaque(size)); // 8.7 ; Casey: 3.9
     //TestCmpASM(opaque(size)); // 8.7; Casey: 3.9
-    TestDecASM(opaque(size)); // 4.4; Casey: 3.9
+    //TestDecASM(opaque(size)); // 4.4; Casey: 3.9
+    //TestMoveAllBytesNOP1x3ASM(opaque(size)); // 4.1; Casey: 3.1
+    //TestMoveAllBytesNOP1x9ASM(opaque(size)); // 2.0; Casey: 1.4
+    string branchPatterns[] = 
+    { 
+        "all taken", // 2.4
+        "all not taken", // 2.4
+        "alternating", // 2.4
+        "pseudo random", // 0.27
+        "2 out of 3 taken" // 2.4
+    };
+    int i = 4;
+    setBranchArray(size, i);
+    cout << "branch pattern " << i << " " << branchPatterns[i] << std::endl;
+    TestCondASM(opaque(size));
 }
