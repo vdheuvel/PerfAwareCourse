@@ -29,7 +29,7 @@ int pageSize = 4096;
 
 u8 branch[1024 * 4096];
 
-// assemble: C:\Users\JeroenvandenHeuvel\AppData\Local\bin\NASM > nasm - f win64 "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopAssemblyRaw.asm" - o "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopAssemblyRaw.obj"
+// assemble: C:\Users\JeroenvandenHeuvel\AppData\Local\bin\NASM > nasm -f win64 "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopAssemblyRaw.asm" -o "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopAssemblyRaw.obj"
 extern "C" void MoveAllBytesASM(u64 count, u8* data);
 extern "C" void NoOp3x1ASM(u64 count, u8* data);
 extern "C" void CmpASM(u64 count, u8* data);
@@ -38,6 +38,16 @@ extern "C" void NoOp1x3ASM(u64 count, u8* data);
 extern "C" void NoOp1x9ASM(u64 count, u8* data);
 extern "C" void NoOp3x1CondASM(u64 count, u8* data);
 
+extern "C" void Load_1xASM(u64 count, u8* data);
+extern "C" void Load_2xASM(u64 count, u8* data);
+extern "C" void Load_3xASM(u64 count, u8* data);
+extern "C" void Load_4xASM(u64 count, u8* data);
+extern "C" void Store_1xASM(u64 count, u8* data);
+extern "C" void Store_2xASM(u64 count, u8* data);
+extern "C" void Store_3xASM(u64 count, u8* data);
+extern "C" void Store_4xASM(u64 count, u8* data);
+
+// assemble: C:\Users\JeroenvandenHeuvel\AppData\Local\bin\NASM > nasm -f win64 "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopLoadStore.asm" -o "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopLoadStore.obj"
 
 // to convince compiler that const size is not const, so it uses 3 byte compare (same as casey's)
 // otherwise it'll use 7 byte compare
@@ -161,6 +171,94 @@ void setBranchArray(u64 size, int option) {
     }
 }
 
+void TestLoad_1xASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Load_1xASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestLoad_2xASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Load_2xASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestLoad_3xASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Load_3xASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestLoad_4xASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Load_4xASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestStore_1xASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Store_1xASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestStore_2xASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Store_2xASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestStore_3xASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Store_3xASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestStore_4xASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Store_4xASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
 int main()
 {
     cpuTimeFreq = getCpuTimerFreq(1000000);
@@ -175,16 +273,26 @@ int main()
     //TestDecASM(opaque(size)); // 4.4; Casey: 3.9
     //TestMoveAllBytesNOP1x3ASM(opaque(size)); // 4.1; Casey: 3.1
     //TestMoveAllBytesNOP1x9ASM(opaque(size)); // 2.0; Casey: 1.4
-    string branchPatterns[] = 
-    { 
-        "all taken", // 2.4
-        "all not taken", // 2.4
-        "alternating", // 2.4
-        "pseudo random", // 0.27
-        "2 out of 3 taken" // 2.4
-    };
-    int i = 4;
-    setBranchArray(size, i);
-    cout << "branch pattern " << i << " " << branchPatterns[i] << std::endl;
-    TestCondASM(opaque(size));
+    //string branchPatterns[] = 
+    //{ 
+    //    "all taken", // 2.4
+    //    "all not taken", // 2.4
+    //    "alternating", // 2.4
+    //    "pseudo random", // 0.27
+    //    "2 out of 3 taken" // 2.4
+    //};
+    //int i = 4;
+    setBranchArray(size, 0);
+    //cout << "branch pattern " << i << " " << branchPatterns[i] << std::endl;
+    //TestCondASM(opaque(size));
+
+    //TestLoad_1xASM(size); // 4.4
+    //TestLoad_2xASM(size); // 8.7
+    //TestLoad_3xASM(size); // 8.7
+    //TestLoad_4xASM(size); // 8.7
+    TestStore_1xASM(size); // 8.7
+    //TestStore_2xASM(size); // 8.7
+    //TestStore_3xASM(size); // 8.7
+    //TestStore_4xASM(size); // 8.7
+
 }
