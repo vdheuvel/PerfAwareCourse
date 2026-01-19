@@ -22,5 +22,6 @@
   <ItemGroup>
     <Object Include="LoopAssemblyRaw.obj" />
     <Object Include="LoopLoadStore.obj" />
+    <Object Include="LoopLoadSIMD.obj" />
   </ItemGroup>
 </Project>

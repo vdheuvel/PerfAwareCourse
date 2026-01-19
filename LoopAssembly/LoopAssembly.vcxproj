@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <Object Include="LoopAssemblyRaw.obj" />
+    <Object Include="LoopLoadSIMD.obj" />
     <Object Include="LoopLoadStore.obj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

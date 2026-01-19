@@ -48,6 +48,13 @@ extern "C" void Store_3xASM(u64 count, u8* data);
 extern "C" void Store_4xASM(u64 count, u8* data);
 
 // assemble: C:\Users\JeroenvandenHeuvel\AppData\Local\bin\NASM > nasm -f win64 "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopLoadStore.asm" -o "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopLoadStore.obj"
+extern "C" void Load_128x1ASM(u64 count, u8* data);
+extern "C" void Load_128x2ASM(u64 count, u8* data);
+extern "C" void Load_256x1ASM(u64 count, u8* data);
+extern "C" void Load_256x2ASM(u64 count, u8* data);
+extern "C" void Load_512x1ASM(u64 count, u8* data);
+extern "C" void Load_512x2ASM(u64 count, u8* data);
+// assemble: C:\Users\JeroenvandenHeuvel\AppData\Local\bin\NASM > nasm -f win64 "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopLoadSIMD.asm" -o "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopLoadSIMD.obj"
 
 // to convince compiler that const size is not const, so it uses 3 byte compare (same as casey's)
 // otherwise it'll use 7 byte compare
@@ -259,6 +266,71 @@ void TestStore_4xASM(u64 size) {
     tester.Print();
 }
 
+
+void TestLoad_128x1ASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Load_128x1ASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestLoad_128x2xASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Load_128x2ASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestLoad_256x1ASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Load_256x1ASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestLoad_256x2xASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Load_256x2ASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+void TestLoad_512x1ASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Load_512x1ASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
+
+void TestLoad_512x2xASM(u64 size) {
+    RepetitionTester tester(10, size, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        Load_512x2ASM(size, (u8*)branch);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
 int main()
 {
     cpuTimeFreq = getCpuTimerFreq(1000000);
@@ -290,9 +362,15 @@ int main()
     //TestLoad_2xASM(size); // 8.7
     //TestLoad_3xASM(size); // 8.7
     //TestLoad_4xASM(size); // 8.7
-    TestStore_1xASM(size); // 8.7
+    //TestStore_1xASM(size); // 8.7
     //TestStore_2xASM(size); // 8.7
     //TestStore_3xASM(size); // 8.7
     //TestStore_4xASM(size); // 8.7
+    //TestLoad_128x1ASM(size); // 8.7
+    //TestLoad_128x2xASM(size); // 17.5
+    //TestLoad_256x1ASM(size); // 17.5
+    //TestLoad_256x2xASM(size); // 34.9
+    TestLoad_512x1ASM(size); // NA, 
+    //TestLoad_512x1ASM(size); // NA, 
 
 }
