@@ -1,0 +1,14 @@
+	dest	source 1	source 2
+mov rax, 1	1	na	
+mov rbx, 2	2	na	
+mov rcx, 3	3	na	
+mov rdx, 4	4	na	
+add rax, rbx	5	2	1
+add rcx, rdx	6	4	3
+add rax, rcx	7	6	5
+mov rcx, rbx	8	2	
+inc rax	9	7	
+dec rcx	10	8	
+sub rax, rbx	11	2	9
+sub rcx, rdx	12	4	10
+sub rax, rcx	13	12	11
