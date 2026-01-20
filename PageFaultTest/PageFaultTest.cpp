@@ -51,7 +51,6 @@ void TestDescending(bool useMalloc) {
     tester.Start();
     int start = tester.GetPageFaultCountForProcess();
     while (!tester.IsDone()) {
-
         char* buffer = useMalloc ? (char*)malloc(pageSize * pageCount) :
             (char*)VirtualAlloc(NULL, pageSize * pageCount, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
         for (int i = pageCount - 1; i >= 0; --i) {
@@ -77,10 +76,10 @@ int main()
     cpuTimeFreq = getCpuTimerFreq(1000000);
     std::cout << "Test ascending with VirtualAlloc" << std::endl;
     TestAscending(false); // 0.0007 ms because of prefetching
-    std::cout << "Test descending with VirtualAlloc" << std::endl;
-    TestDescending(false); // 0.0013 ms
-    std::cout << "Test ascending with malloc" << std::endl;
-    TestAscending(true); // 0.0008 ms
-    std::cout << "Test descending with malloc" << std::endl;
-    TestDescending(true); // 0.0013
+    //std::cout << "Test descending with VirtualAlloc" << std::endl;
+    //TestDescending(false); // 0.0013 ms
+    //std::cout << "Test ascending with malloc" << std::endl;
+    //TestAscending(true); // 0.0008 ms
+    //std::cout << "Test descending with malloc" << std::endl;
+    //TestDescending(true); // 0.0013
 }

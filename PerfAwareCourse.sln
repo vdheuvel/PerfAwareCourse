@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Profiler", "Profiler\Profil
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PageFaultTest", "PageFaultTest\PageFaultTest.vcxproj", "{8520A782-2BC0-4505-9B31-7274B2548C04}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoopExampleApp", "LoopExampleApp\LoopExampleApp.vcxproj", "{8CF46B10-B897-47BA-A7A8-EA221FF9A720}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -73,6 +75,14 @@ Global
 		{8520A782-2BC0-4505-9B31-7274B2548C04}.Release|x64.Build.0 = Release|x64
 		{8520A782-2BC0-4505-9B31-7274B2548C04}.Release|x86.ActiveCfg = Release|Win32
 		{8520A782-2BC0-4505-9B31-7274B2548C04}.Release|x86.Build.0 = Release|Win32
+		{8CF46B10-B897-47BA-A7A8-EA221FF9A720}.Debug|x64.ActiveCfg = Debug|x64
+		{8CF46B10-B897-47BA-A7A8-EA221FF9A720}.Debug|x64.Build.0 = Debug|x64
+		{8CF46B10-B897-47BA-A7A8-EA221FF9A720}.Debug|x86.ActiveCfg = Debug|Win32
+		{8CF46B10-B897-47BA-A7A8-EA221FF9A720}.Debug|x86.Build.0 = Debug|Win32
+		{8CF46B10-B897-47BA-A7A8-EA221FF9A720}.Release|x64.ActiveCfg = Release|x64
+		{8CF46B10-B897-47BA-A7A8-EA221FF9A720}.Release|x64.Build.0 = Release|x64
+		{8CF46B10-B897-47BA-A7A8-EA221FF9A720}.Release|x86.ActiveCfg = Release|Win32
+		{8CF46B10-B897-47BA-A7A8-EA221FF9A720}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
