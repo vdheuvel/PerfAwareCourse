@@ -2,11 +2,13 @@ BITS 64
 
 global Load_128x1ASM
 global Load_128x2ASM
+global Load_128x3ASM
 global Load_256x1ASM
 global Load_256x2ASM
+global Load_256x3ASM
 global Load_512x1ASM
 global Load_512x2ASM
-
+global Load_512x3ASM
 
 section .text
 
@@ -24,6 +26,15 @@ Load_128x2ASM:
   sub rcx, 4 
   jg .loop
   ret
+Load_128x3ASM:
+.loop:
+  movdqu xmm0, [rdx]
+  movdqu xmm0, [rdx]
+  movdqu xmm0, [rdx]
+  sub rcx, 6 
+  jg .loop
+  ret 
+ 
   
 Load_256x1ASM:
 .loop:
@@ -39,6 +50,15 @@ Load_256x2ASM:
   sub rcx, 8 
   jg .loop
   ret
+
+Load_256x3ASM:
+.loop:
+  vmovdqu ymm0, [rdx]
+  vmovdqu ymm0, [rdx]
+  vmovdqu ymm0, [rdx]
+  sub rcx, 12
+  jg .loop
+  ret
   
 Load_512x1ASM:
 .loop:
@@ -52,5 +72,14 @@ Load_512x2ASM:
   vmovdqu32 zmm0, [rdx]
   vmovdqu32 zmm0, [rdx]
   sub rcx, 16 
+  jg .loop
+  ret
+  
+Load_512x3ASM:
+.loop:
+  vmovdqu32 zmm0, [rdx]
+  vmovdqu32 zmm0, [rdx]
+  vmovdqu32 zmm0, [rdx]
+  sub rcx, 24
   jg .loop
   ret
