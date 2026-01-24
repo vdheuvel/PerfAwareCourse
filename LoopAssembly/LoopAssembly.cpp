@@ -62,6 +62,9 @@ extern "C" void Load_512x3ASM(u64 count, u8* data);
 // assemble: C:\Users\JeroenvandenHeuvel\AppData\Local\bin\NASM > nasm -f win64 "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopLoadSIMD.asm" -o "C:\Users\JeroenvandenHeuvel\source\repos\vdheuvel\PerfAwareCourse\LoopAssembly\LoopLoadSIMD.obj"
 // assemble: nasm -f win64 "C:\Users\Jeroen\source\repos\PerfAwareCourse\LoopAssembly\LoopLoadSIMD.asm" -o "C:\Users\Jeroen\source\repos\PerfAwareCourse\LoopAssembly\LoopLoadSIMD.obj"
 
+extern "C" void CacheTestASM(u64 count, u8* data, u64 mask);
+// nasm -f win64 "C:\Users\Jeroen\source\repos\PerfAwareCourse\LoopAssembly\CacheTest.asm" -o "C:\Users\Jeroen\source\repos\PerfAwareCourse\LoopAssembly\CacheTest.obj"
+
 // to convince compiler that const size is not const, so it uses 3 byte compare (same as casey's)
 // otherwise it'll use 7 byte compare
 u64 opaque(u64 x) { return x; } 
@@ -367,7 +370,22 @@ void TestLoad_512x3ASM(u64 size) {
     tester.Finish();
     tester.Print();
 }
-
+void CacheTestASM(u64 size, u64 mask) {
+    u64 cacheTestSize = 1024 * 1024 * 1024;
+    u64 repetitions = cacheTestSize * 10;
+    char* buffer = (char*)VirtualAlloc(NULL, cacheTestSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    for(u64 i = 0; i < size; ++i) {
+        buffer[i] = (u8)i;
+    }
+    RepetitionTester tester(10, repetitions, cpuTimeFreq);
+    tester.Start();
+    while (!tester.IsDone()) {
+        CacheTestASM(repetitions, (u8*)buffer, mask);
+        tester.SubmitRepetition();
+    }
+    tester.Finish();
+    tester.Print();
+}
 int main()
 {
     cpuTimeFreq = getCpuTimerFreq(1000000);
@@ -378,7 +396,7 @@ int main()
     //Test(opaque(size)); // 4.5; Casey: 3.5
     //TestMoveAllBytesASM(opaque(size)); // 4.5; Casey: 3.5
     //TestMoveAllBytesNOP3x1ASM(opaque(size)); // 8.7 ; Casey: 3.9
-    //TestCmpASM(opaque(size)); // 8.7; Casey: 3.9
+    //TestCmpASM(opaque(size)); // 8.7; Casey: 3.9          
     //TestDecASM(opaque(size)); // 4.4; Casey: 3.9
     //TestMoveAllBytesNOP1x3ASM(opaque(size)); // 4.1; Casey: 3.1
     //TestMoveAllBytesNOP1x9ASM(opaque(size)); // 2.0; Casey: 1.4
@@ -411,6 +429,34 @@ int main()
     //TestLoad_256x3ASM(size); // 34.9; 41.9
     //TestLoad_512x1ASM(size); // NA; 41.9
     //TestLoad_512x2ASM(size); // NA; 83.7
-    TestLoad_512x3ASM(size); // NA; 83.9
+    u64 cacheTestSize = 1024 * 1024 * 1024;
+    //CacheTestASM(cacheTestSize, 63); //
+    //CacheTestASM(cacheTestSize, 127); // 333
+    //CacheTestASM(cacheTestSize, 255); //
+    //CacheTestASM(cacheTestSize, 511); //
+    //CacheTestASM(cacheTestSize, 1023); // 10
+    //CacheTestASM(cacheTestSize, 2047); // 11
+    //CacheTestASM(cacheTestSize, 4095); // 12
+    //CacheTestASM(cacheTestSize, 8191); // 13
+    CacheTestASM(cacheTestSize, 16383); // 14 330
+    //CacheTestASM(cacheTestSize, 32767); // 15 331
+    //CacheTestASM(cacheTestSize, 65535); // 16 204
+    //CacheTestASM(cacheTestSize, 131071); // 17 218 <- above L1 cache (80KB)
+    //CacheTestASM(cacheTestSize, 262143); //  18 196
+    //CacheTestASM(cacheTestSize, 524287); // 317 <- anomaly
+    //CacheTestASM(cacheTestSize, 1048575); // 20 211 <- at L2 cache (1MB)
+    //CacheTestASM(cacheTestSize, 2097151); // 21 148
+    //CacheTestASM(cacheTestSize, 4194303); // 22 140
+    //CacheTestASM(cacheTestSize, 8388607); // 23 138
+    //CacheTestASM(cacheTestSize, 16777215); // 24 145
+    //CacheTestASM(cacheTestSize, 33554431); // 25 151
+    //CacheTestASM(cacheTestSize, 67108863); // 26 71 <- above L3 cache (64MB)
+    //CacheTestASM(cacheTestSize, 134217727); // 27 57
+    //CacheTestASM(cacheTestSize, 268435455); // 28 50
+    //CacheTestASM(cacheTestSize, 268435455); // 28 50
 
+    // limits: 50 GB/s out of 90 GB/s memory bandwidth
+    // L3: 150 GB/s
+    // L2: 210 GB/s
+    // L1: 330 GB/s
 }

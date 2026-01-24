@@ -23,5 +23,6 @@
     <Object Include="LoopAssemblyRaw.obj" />
     <Object Include="LoopLoadStore.obj" />
     <Object Include="LoopLoadSIMD.obj" />
+    <Object Include="CacheTest.obj" />
   </ItemGroup>
 </Project>

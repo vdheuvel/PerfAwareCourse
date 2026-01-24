@@ -130,6 +130,7 @@
     <ClCompile Include="LoopAssembly.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Object Include="CacheTest.obj" />
     <Object Include="LoopAssemblyRaw.obj" />
     <Object Include="LoopLoadSIMD.obj" />
     <Object Include="LoopLoadStore.obj" />

@@ -36,10 +36,10 @@ public:
     u64 cpuTimeFrequency;
     u64 repetitionStartTime;
     u64 repetitionStartPageFaults;
-    const int dataSize;
+    u64 dataSize;
     HANDLE hProc;
     u64 pageFaultsStart;
-    RepetitionTester(const int durationSeconds, int dataSize, u64 cpuTimeFrequency)
+    RepetitionTester(const int durationSeconds, u64 dataSize, u64 cpuTimeFrequency)
         : durationIncrement(durationSeconds),
         dataSize(dataSize)
     {
