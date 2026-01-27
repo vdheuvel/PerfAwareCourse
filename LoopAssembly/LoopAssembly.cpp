@@ -386,6 +386,26 @@ void CacheTestASM(u64 size, u64 mask) {
     tester.Finish();
     tester.Print();
 }
+void CacheTestOffsetASM(u64 size, u64 mask) {
+    u64 cacheTestSize = 1024 * 1024 * 1024;
+    u64 repetitions = cacheTestSize * 10;
+    char* buffer = (char*)VirtualAlloc(NULL, cacheTestSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    for(u64 i = 0; i < size; ++i) {
+        buffer[i] = (u8)i;
+    }
+    u64 offsets[] = { 1, 4,7, 8, 15, 16, 32, 33 };
+    for (int i = 0; i < 7; ++i) {
+        std::cout << "offset " << offsets[i] << std::endl;
+        RepetitionTester tester(10, repetitions, cpuTimeFreq);
+        tester.Start();
+        while (!tester.IsDone()) {
+            CacheTestASM(repetitions, (u8*)buffer + offsets[i], mask);
+            tester.SubmitRepetition();
+        }
+        tester.Finish();
+        tester.Print();
+    }
+}
 int main()
 {
     cpuTimeFreq = getCpuTimerFreq(1000000);
@@ -437,26 +457,33 @@ int main()
     //CacheTestASM(cacheTestSize, 1023); // 10
     //CacheTestASM(cacheTestSize, 2047); // 11
     //CacheTestASM(cacheTestSize, 4095); // 12
-    //CacheTestASM(cacheTestSize, 8191); // 13
-    CacheTestASM(cacheTestSize, 16383); // 14 330
-    //CacheTestASM(cacheTestSize, 32767); // 15 331
-    //CacheTestASM(cacheTestSize, 65535); // 16 204
-    //CacheTestASM(cacheTestSize, 131071); // 17 218 <- above L1 cache (80KB)
-    //CacheTestASM(cacheTestSize, 262143); //  18 196
-    //CacheTestASM(cacheTestSize, 524287); // 317 <- anomaly
-    //CacheTestASM(cacheTestSize, 1048575); // 20 211 <- at L2 cache (1MB)
-    //CacheTestASM(cacheTestSize, 2097151); // 21 148
-    //CacheTestASM(cacheTestSize, 4194303); // 22 140
-    //CacheTestASM(cacheTestSize, 8388607); // 23 138
-    //CacheTestASM(cacheTestSize, 16777215); // 24 145
-    //CacheTestASM(cacheTestSize, 33554431); // 25 151
-    //CacheTestASM(cacheTestSize, 67108863); // 26 71 <- above L3 cache (64MB)
-    //CacheTestASM(cacheTestSize, 134217727); // 27 57
-    //CacheTestASM(cacheTestSize, 268435455); // 28 50
-    //CacheTestASM(cacheTestSize, 268435455); // 28 50
+    //CacheTestASM(cacheTestSize, 8191); // 13 664
+    //CacheTestASM(cacheTestSize, 16383); // 14 664
+    //CacheTestASM(cacheTestSize, 32767); // 15 663
+    //CacheTestASM(cacheTestSize, 65535); // 16 182 <- above L1 cache (80KB / 2 = 40KB)
+    //CacheTestASM(cacheTestSize, 131071); // 17 194 
+    //CacheTestASM(cacheTestSize, 262143); //  18 192
+    //CacheTestASM(cacheTestSize, 524287); // 19 195 <- at L2 cache (1MB)
+    //CacheTestASM(cacheTestSize, 1048575); // 20 172 
+    CacheTestASM(cacheTestSize, 2097151); // 21 165
+    //CacheTestASM(cacheTestSize, 4194303); // 22 
+    //CacheTestASM(cacheTestSize, 8388607); // 23 
+    //CacheTestASM(cacheTestSize, 16777215); // 24 155
+    //CacheTestASM(cacheTestSize, 33554431); // 25 131 <- just above L3 cache (64MB / 2 = 32MB)
+    //CacheTestASM(cacheTestSize, 67108863); // 26 74 
+    //CacheTestASM(cacheTestSize, 134217727); // 27 58
+    //CacheTestASM(cacheTestSize, 268435455); // 28
+    //CacheTestASM(cacheTestSize, 268435455); // 28
 
     // limits: 50 GB/s out of 90 GB/s memory bandwidth
     // L3: 150 GB/s
     // L2: 210 GB/s
     // L1: 330 GB/s
+
+    //CacheTestOffsetASM(cacheTestSize, 127); // L1 test. all 333, except 15, 16: 332
+    //CacheTestOffsetASM(cacheTestSize, 262143); // L2 test. 1: 182, 4: 196, 7: 194, 8: 172, 15: 175, 16: 175, 32: 197
+    //CacheTestOffsetASM(cacheTestSize, 2097151); // L3 test. 1: 152, 4: 149, 7: 149, 8: 150, 15: 149, 16: 150, 32: 150
+
+    //theory: offset is mostly a performance penalty in L3
+
 }
